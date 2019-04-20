@@ -1,0 +1,11 @@
+Workspace: PATHEOS_DATA
+ID: 100001
+something user: patheos_data
+password: password
+
+Administrator username: admin
+Administrator password: password
+
+default tablespace: APEX_4774522269147181 
+
+datafile /u01/app/oracle/oradata/XE/APEX_4774522269147181.dbf
