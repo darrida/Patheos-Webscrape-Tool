@@ -1,4 +1,19 @@
 --###############################################
+--########### USER PERMISSIONS NEEDED ###########
+--###############################################
+--Still not sure exactly what permissions are needed.
+--All of the below were run previously, but pretty sure they are not all needed.
+
+GRANT ALL ON patheos_data.apex_posts TO system;
+GRANT ALL ON patheos_data.apex_blogs TO system;
+GRANT ALL ON patheos_data.apex_beliefs TO system;
+
+GRANT SELECT ON patheos_blogs to patheos_data;
+GRANT SELECT ON patheos_posts to patheos_data;
+GRANT SELECT ON patheos_beliefs to patheos_data;
+
+
+--###############################################
 --######## INSERT NEW BELIEFS INTO APEX #########
 --###############################################
 create or replace TRIGGER APEX_PATHEOS_NEWBELIEF
