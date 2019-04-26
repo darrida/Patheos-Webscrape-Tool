@@ -8,24 +8,6 @@ invalid_category = []
 invalid_blog = []
 invalid_post = []
 
-def set_invalid_category(ecategory):
-    invalid_category.append(ecategory)
-        
-def get_invalid_category():
-    return invalid_category
-    
-def set_invalid_blog(eblog):
-    invalid_blog.append(eblog)
-        
-def get_invalid_blog():
-    return invalid_blog
-
-def set_invalid_post(epost):
-    invalid_post.append(epost)
-    
-def get_invalid_post():
-    return invalid_post
-    
 #count_row = df.shape[0]
 #total_process = df_results.shape[0]
 
@@ -49,11 +31,8 @@ def access_insert_execute(db_user, db_password, user, database, input_df):
     pdup = 0
     pe = 0
     
-    #for post_url in a(unique_subblog_list):
-    #enumerate(tqdm(...))
     #(1) COMPARE TO EXISTING CATEGORIES:
-    for i, row in enumerate(input_df.itertuples(), 1):
-    #for i, row in enumerate(tqdm(df_results.itertuples(), 1)):   
+    for i, row in enumerate(input_df.itertuples(), 1): 
         try:
             beliefs_test = pd.read_sql("SELECT * FROM patheos_beliefs WHERE beliefs_url = '" + str(row.beliefs_url) + "'", con_engine)
             if beliefs_test.empty == True:
@@ -74,7 +53,6 @@ def access_insert_execute(db_user, db_password, user, database, input_df):
                 cur2.execute("SELECT * FROM patheos_beliefs WHERE beliefs_number = '" + str(new_number) + "'")
                 res = cur2.fetchall()
                 cur2.close()
-                #print("INSERTED BELIEF: " + str(res))
                 cur.close()
                 c = c + 1
             else:
@@ -82,10 +60,8 @@ def access_insert_execute(db_user, db_password, user, database, input_df):
                 cur3.execute("SELECT MAX(beliefs_number) FROM patheos_beliefs WHERE beliefs_url = '" + row.beliefs_url + "'")
                 beliefs_number = str(cur3.fetchall()[0][0])
                 cur3.close()
-                #print("BELIEF ALREADY EXISTS: " + beliefs_number + " " + row.beliefs_name)
         except:
             invalid_category.append(row.beliefs_url)
-            #print("FAILED TO INSERT " + row.beliefs_url)
             ce = ce + 1 
         
         
@@ -111,7 +87,6 @@ def access_insert_execute(db_user, db_password, user, database, input_df):
                 cur5.execute("SELECT * FROM patheos_blogs WHERE blogs_number = '" + str(new_blog_number) + "'")
                 res2 = cur5.fetchall()
                 cur5.close()
-                #print("INSERTED BLOG: " + str(res2))
                 cur4.close()
                 b = b + 1
             else:
@@ -119,10 +94,8 @@ def access_insert_execute(db_user, db_password, user, database, input_df):
                 cur6.execute("SELECT MAX(blogs_number) FROM patheos_blogs WHERE blogs_url = '" + row.blogs_url + "'")
                 blogs_number = str(cur6.fetchall()[0][0])
                 cur6.close()
-                #print("BLOG ALREADY EXISTS: " + blogs_number + " " + row.blogs_name)
         except:
             invalid_blog.append(row.blogs_url)
-            #print("FAILED TO INSERT " + row.blogs_url)
             be = be + 1
         
     #(3) COMPARE TO EXISTING POSTS:
@@ -144,7 +117,6 @@ def access_insert_execute(db_user, db_password, user, database, input_df):
                                 VALUES
                                 ('""" + str(new_post_number) + """','""" + row.posts_title + """','""" + blogs_number + """','""" + row.posts_author + """',""" 
                                       + """to_date('""" + row.posts_date + """','MONTH DD, YYYY'), :val ,'""" + row.posts_url + """')""", val = var)   
-                                    #to_date('March 13, 2019','MONTH DD, YYYY')
                 con.commit()
                 #cur8 = con.cursor()
                 #cur8.execute("SELECT * FROM patheos_posts WHERE posts_number = '" + str(new_post_number) + "'")
@@ -158,23 +130,36 @@ def access_insert_execute(db_user, db_password, user, database, input_df):
                 cur9.execute("SELECT MAX(posts_number) FROM patheos_posts WHERE posts_url = '" + row.posts_url + "'")
                 posts_number = str(cur9.fetchall()[0][0])
                 cur9.close()
-                #print("POST ALREADY EXISTS: " + posts_number + " " + row.posts_title + "\n")
                 pdup = pdup + 1
         except:
             invalid_post.append(row.posts_url)
-            #print("FAILED TO INSERT " + row.posts_url)
             pe = pe + 1
-        #print("Processed " + str(i) + " of " + str(total_process))
-        #sys.stdout.write("\033[K")
         sys.stdout.write('\r'+ str(i) + "/" + str(total_process) + " | BELIEFS: new(" + str(c) + ") e(" + str(ce) 
                                                                  + ") | BLOGS: new(" + str(b) + ") e(" + str(be) 
                                                                  + ") | POSTS: new(" + str(p) + ") dup(" + str(pdup) + ") e(" + str(pe) + ")")
         #time.sleep(0.5)
         
-    
-    #df_data.to_sql('patheos_test', con_engine, if_exists='append',index=False)
 
     print("\nINSERT COMPLETE.")    
     con.close()
     print("--------------\n***DISCONNECTING***\n")
     #return df_user_access
+    
+
+#def set_invalid_category(ecategory):
+#    invalid_category.append(ecategory)
+        
+#def get_invalid_category():
+#    return invalid_category
+    
+#def set_invalid_blog(eblog):
+#    invalid_blog.append(eblog)
+        
+#def get_invalid_blog():
+#    return invalid_blog
+
+#def set_invalid_post(epost):
+#    invalid_post.append(epost)
+    
+#def get_invalid_post():
+#    return invalid_post   

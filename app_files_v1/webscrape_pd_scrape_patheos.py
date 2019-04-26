@@ -12,6 +12,7 @@ def full_scrape(input_list, unicode_escape_yes_no):
 
     def validate_web_url(url_test):
         try:
+            #print(url_test)
             urlopen(url_test)
             return True
         except URLError:
@@ -19,7 +20,8 @@ def full_scrape(input_list, unicode_escape_yes_no):
 
     total = 0
     for url in tqdm(input_list):   
-        url_str = url[0]
+        #print(url)
+        url_str = url #[0]
         #print(url)
         #print(url_str)
         if validate_web_url(url_str) == True:
@@ -65,3 +67,10 @@ def full_scrape(input_list, unicode_escape_yes_no):
                  decode('utf-8') if isinstance(x, str) else x)
 
     return df_results
+
+
+# Notes about the unicode_escape:
+# - It will turn single quotes and double quotes into character codes in the excel text
+# - Characters found so far:
+#   - \u2019: single quotation mark
+#   - \u201c and u\201d: left and right double quotation marks
