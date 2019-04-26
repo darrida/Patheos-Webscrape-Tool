@@ -4,7 +4,7 @@ from tqdm import tqdm
 from urllib.request import urlopen, URLError
 import requests
 
-def full_scrape(input_list):
+def full_scrape(input_list, unicode_escape_yes_no):
     invalid_urls = []
 
     patheos_posts = input_list #list_posts_only
@@ -60,6 +60,8 @@ def full_scrape(input_list):
             else: 
                 #"- NOT APPENDED"
                 invalid_urls.append(url)
-    df_results = df_results.applymap(lambda x: x.encode('unicode_escape').
+    if unicode_escape_yes_no == "yes":
+        df_results = df_results.applymap(lambda x: x.encode('unicode_escape').
                  decode('utf-8') if isinstance(x, str) else x)
+
     return df_results
