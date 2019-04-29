@@ -18,7 +18,7 @@ def access_compare_query(db_user, db_password, user, database, input_df):
     df_post_urls.sort_values('URL',inplace=True)
     #print(df_post_urls)
     
-    #uncomment in productions
+    #uncomment in production
     #df_new_urls = input_df
     df_new_urls['scraped'] = 'scraped'
     df_new_urls.set_index('scraped',append=True,inplace=True)
