@@ -4,7 +4,7 @@ from tqdm import tqdm
 from urllib.request import urlopen, URLError
 import requests
 
-def full_scrape(input_list):
+def full_scrape(input_list, unicode_escape_yes_no):
     invalid_urls = []
 
     patheos_posts = input_list #list_posts_only
@@ -12,6 +12,7 @@ def full_scrape(input_list):
 
     def validate_web_url(url_test):
         try:
+            #print(url_test)
             urlopen(url_test)
             return True
         except URLError:
@@ -19,7 +20,8 @@ def full_scrape(input_list):
 
     total = 0
     for url in tqdm(input_list):   
-        url_str = url[0]
+        #print(url)
+        url_str = url #[0]
         #print(url)
         #print(url_str)
         if validate_web_url(url_str) == True:
@@ -60,6 +62,15 @@ def full_scrape(input_list):
             else: 
                 #"- NOT APPENDED"
                 invalid_urls.append(url)
-    df_results = df_results.applymap(lambda x: x.encode('unicode_escape').
+    if unicode_escape_yes_no == "yes":
+        df_results = df_results.applymap(lambda x: x.encode('unicode_escape').
                  decode('utf-8') if isinstance(x, str) else x)
+
     return df_results
+
+
+# Notes about the unicode_escape:
+# - It will turn single quotes and double quotes into character codes in the excel text
+# - Characters found so far:
+#   - \u2019: single quotation mark
+#   - \u201c and u\201d: left and right double quotation marks
