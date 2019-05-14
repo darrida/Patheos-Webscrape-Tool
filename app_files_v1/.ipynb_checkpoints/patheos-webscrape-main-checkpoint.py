@@ -16,7 +16,6 @@
 # %%
 from bs4 import BeautifulSoup as BS
 import pandas as pd
-
 import csv
 import requests
 import time
