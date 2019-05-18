@@ -16,11 +16,11 @@ PATHEOSDBAPEX =
     )
   )
 
-SERVER3 =
+LOCALHOST =
   (DESCRIPTION = 
-    (ADDRESS = (PROTOCOL=TCP)(HOST=10.10.10.02)(PORT=1521))
+    (ADDRESS = (PROTOCOL=TCP)(HOST=localhost)(PORT=1521))
     (CONNECT_DATA = 
       (SERVER = dedicated)
-      (SERVICE_NAME = S3)
+      (SERVICE_NAME = xe)
     )
   )
