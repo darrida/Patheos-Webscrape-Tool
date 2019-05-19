@@ -8,7 +8,7 @@ def access_compare_query(db_user, db_password, user, database, input_df):
     con = cx_Oracle.connect(connection_string)
     df_post_urls = pd.read_sql("""SELECT posts_url FROM patheos_posts""", con)
     
-df_new_urls = input_df #pd.read_csv('patheos_posts_test.csv')
+    df_new_urls = input_df #pd.read_csv('patheos_posts_test.csv')
     print("New URL list before: ")
     print(df_new_urls.shape[0])
 
@@ -21,7 +21,7 @@ df_new_urls = input_df #pd.read_csv('patheos_posts_test.csv')
     #uncomment in production
     #df_new_urls = input_df
     df_new_urls['scraped'] = 'scraped'
-    df_new_urls.set_index('scraped',append=True,inplace=True)
+    df_new_urls.set_index('scraped',append=True, inplace=True)
     df_new_urls.drop('Unnamed: 0', axis=1, inplace=True)
     df_new_urls.rename(columns={'0': 'URL'}, inplace=True)
     df_new_urls.sort_values('URL',inplace=True)

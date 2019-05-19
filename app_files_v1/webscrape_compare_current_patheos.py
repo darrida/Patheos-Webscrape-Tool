@@ -21,7 +21,7 @@ def access_compare_query(db_user, db_password, user, database, input_df):
     #uncomment in production
     #df_new_urls = input_df
     df_new_urls['scraped'] = 'scraped'
-    df_new_urls.set_index('scraped',append=True,inplace=True)
+    df_new_urls.set_index('scraped',append=True, inplace=True)
     df_new_urls.drop('Unnamed: 0', axis=1, inplace=True)
     df_new_urls.rename(columns={'0': 'URL'}, inplace=True)
     df_new_urls.sort_values('URL',inplace=True)
