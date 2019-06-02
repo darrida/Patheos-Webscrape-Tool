@@ -1,4 +1,8 @@
-﻿ALTER USER postgres WITH PASSWORD 'password';
+﻿SELECT * FROM patheos_beliefs;
+SELECT * FROM patheos_blogs;
+SELECT * FROM patheos_posts;
+
+ALTER USER postgres WITH PASSWORD 'password';
 
 CREATE TABLE PATHEOS_BELIEFS (
     BELIEFS_NUMBER SERIAL PRIMARY KEY, 
