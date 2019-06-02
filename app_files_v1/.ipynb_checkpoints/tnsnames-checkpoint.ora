@@ -24,3 +24,12 @@ LOCALHOST =
       (SERVICE_NAME = xe)
     )
   )
+  
+LOCALPOSTGRES =
+  (DESCRIPTION = 
+    (ADDRESS = (PROTOCOL=TCP)(HOST=localhost)(PORT=5432))
+    (CONNECT_DATA = 
+      (SERVER = )
+      (SERVICE_NAME = )
+    )
+  )
