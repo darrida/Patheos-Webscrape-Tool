@@ -1,6 +1,10 @@
 ﻿SELECT * FROM patheos_beliefs;
 SELECT * FROM patheos_blogs;
 SELECT * FROM patheos_posts;
+SELECT COUNT(*) FROM patheos_posts;
+SELECT COUNT(*) FROM patheos_posts WHERE blogs_number = 1;
+
+SELECT * FROM patheos_posts WHERE posts_content LIKE '%'' + '\u201d%';
 
 ALTER USER postgres WITH PASSWORD 'password';
 
