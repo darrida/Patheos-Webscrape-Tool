@@ -9,7 +9,9 @@ SELECT b.blogs_number, b.blogs_name,
 SELECT * FROM patheos_posts;
 
 SELECT * FROM patheos_posts WHERE create_date IS NOT NULL;
+
 SELECT COUNT(*) FROM patheos_posts;
+
 SELECT COUNT(*) FROM patheos_posts WHERE blogs_number = 14;
 
 SELECT * FROM patheos_posts WHERE posts_url = 'https://www.patheos.com/blogs/daffeythoughts/2010/09/because-only-small-minded-americans-obsess-about-such-things.html';

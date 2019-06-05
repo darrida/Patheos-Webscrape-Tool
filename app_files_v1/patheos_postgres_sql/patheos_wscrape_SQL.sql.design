@@ -8,12 +8,12 @@
     <ProviderVersion>2.1.97.0</ProviderVersion>
     <SchemaVersion>2.0</SchemaVersion>
   </Properties>
-  <Connection Name="localhost-docker">
+  <Connection Name="postgres.192.168.86.108:4321">
     <Category>00000000-0000-0000-0000-000000000000</Category>
-    <ConnectionString>User Id=postgres;Host=localhost;Port=5432;Unicode=True;Connection Timeout=15;Default Command Timeout=30;Integrated Security=False</ConnectionString>
+    <ConnectionString>User Id=postgres;Host=192.168.86.108;Port=4321;Database=postgres;Unicode=True;Connection Timeout=15;Default Command Timeout=30;Integrated Security=False</ConnectionString>
     <Database>postgres</Database>
   </Connection>
-  <Views ShowAdditionalViews="True" IsLayoutActiveAttribute="True" MainViewAttribute="Code" MainViewScale="47">
+  <Views ShowAdditionalViews="False" IsLayoutActiveAttribute="False" MainViewAttribute="Code" MainViewScale="16">
     <View Name="Code" Active="True" Visible="True">
       <Data />
     </View>

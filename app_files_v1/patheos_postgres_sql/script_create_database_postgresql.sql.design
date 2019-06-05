@@ -13,11 +13,11 @@
     <ConnectionString>User Id=postgres;Host=localhost;Port=5432;Unicode=True;Connection Timeout=15;Default Command Timeout=30;Integrated Security=False</ConnectionString>
     <Database>postgres</Database>
   </Connection>
-  <Views ShowAdditionalViews="True" IsLayoutActiveAttribute="True" MainViewAttribute="Code" MainViewScale="47">
+  <Views ShowAdditionalViews="False" IsLayoutActiveAttribute="True" MainViewAttribute="Code" MainViewScale="50">
     <View Name="Code" Active="True" Visible="True">
       <Data />
     </View>
-    <View Name="Data" Visible="True" />
+    <View Name="Data" Visible="False" />
     <View Name="Profiler" Visible="False" />
     <View Name="PivotGrid" Visible="False" />
   </Views>
