@@ -6,7 +6,7 @@
 - I approached learning Python (primarily using Jupyter) by choosing a problem to solve. The small task that I took on was to work toward downloading every blog post on Patheos.com (large, multi-section, multi-tenant blogging site). I bit off more than I could chew and had to rise to the occasion.
 - Required changes
   - Refactoring giant functions into much smaller, ideally single task functionality (current status is very difficult to read, and writing unit test would be a nearly impossible task)
-  - Move database connection and database data management into it's own class - interact with it through a context manager (__enter__, __exit__)
+  - Move database connection and database data management into it's own class, and interact with it through a context manager
   - Move data formats used to prepare information to be inserted into the database into classes as well (Uses would include data validattion before attempted database insertion)
   - Exception handlers across the board (in its current state it crashes upon encountering a form of unstructured data I hadn't designed it to process)
   - 
