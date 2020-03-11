@@ -10,6 +10,7 @@
   - Move data formats used to prepare information to be inserted into the database into classes as well (Uses would include data validattion before attempted database insertion)
   - implement exception handlers across the board (in its current state it crashes upon encountering a form of unstructured data I hadn't designed it to process)
   - Look into using dictionaries instead of Pandas (or even classes, to handle, validation transformation, logging, and errors immediately upon individual data scrape). Whichever is more accessible/readable. performance concerns with this process are not high. Either way, dictionaries will be faster than misusing Pandas.
+  - Break the code up into smaller modules, and implement intentional structure in the application directory as a whole.
 
 ## Goal
 
