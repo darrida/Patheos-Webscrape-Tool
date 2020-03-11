@@ -6,6 +6,7 @@
 - This was pretty much the **first** project I worked on while learning Python.
 - I approached learning Python (primarily using Jupyter) by **choosing a problem to solve**. The **"small task"** that I took on was to work toward downloading **every** blog post across Patheos.com (large, multi-section, multi-tenant blogging site). Patheos hosts hundreds of thousands of blog posts, with all of the variability of unstructured data that brings with it. I bit off more than I could chew and had to rise to the occasion.
 - Ultimately, in the midst of my very un-ideal code, my first challenge I took on to learn Python a few years ago **successfully scraped, parsed, and inserted unstructured data** from over **350,000** blog posts into a PostgreSQL database.
+- In the current state, it would be difficult for anyone unfamiliar with the code to make sense of, much less run it
 - **Required changes**
   - **Refactor gigantic functions** into much smaller, ideally single task functionality (current status is very difficult to read, and writing unit tests would be a nearly impossible task)
   - Move database connection and database data management into a class, and interact with it through a **context manager**
@@ -32,12 +33,17 @@
 
 ## Proof of concepts for the following exist:
 
-Efficiently scraping:
-- categories
-- blogs from categories
-- blog pages from blogs
-- posts content from blog pages
-- export to csv
-- export to xlsx
-- insert into Oracle database tables (3, for category, blog, and posts
+#### Basic Functionality
+
+- Scrapes
+  - categories
+  - blogs from categories
+  - blog pages from blogs
+  - posts content from blog pages
+- Exports
+  - export to csv
+  - export to xlsx
+- Inserts
+  - into Oracle database tables (3, for category, blog, and posts)
+  - into PostgreSQL database tables (3, for category, blog, and posts)
 
