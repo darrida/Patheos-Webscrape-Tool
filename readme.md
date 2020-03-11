@@ -2,16 +2,20 @@
 
 ## Learning Notes
 
-- **NOTE:** This repository younger than the actual project. I moved it into GitHub last year with intention of rewriting the tool. That's still on the list. This code needs refactoring across the board (many many obvious design issues, which are glariingly obvious to me in 2020).
+- **NOTE:** This repository younger than the actual project. I moved it into GitHub last year with intention of rewriting the tool. That's still on the list. This code needs refactoring across almost every line (many many obvious design issues, which are glariingly obvious to me in 2020).
 - I approached learning Python (primarily using Jupyter) by choosing a problem to solve. The small task that I took on was to work toward downloading every blog post on Patheos.com (large, multi-section, multi-tenant blogging site). I bit off more than I could chew and had to rise to the occasion.
-- Required changes
-  - Refactor giant functions into much smaller, ideally single task functionality (current status is very difficult to read, and writing unit test would be a nearly impossible task)
+- **Required changes**
+  - Refactor gigantic functions into much smaller, ideally single task functionality (current status is very difficult to read, and writing unit tests would be a nearly impossible task)
   - Move database connection and database data management into it's own class, and interact with it through a context manager
   - Move data formats used to prepare information to be inserted into the database into classes as well (Uses would include data validattion before attempted database insertion)
   - implement exception handlers across the board (in its current state it crashes upon encountering a form of unstructured data I hadn't designed it to process)
   - Look into using dictionaries instead of Pandas (or even classes, to handle, validation transformation, logging, and errors immediately upon individual data scrape). Whichever is more accessible/readable. performance concerns with this process are not high. Either way, dictionaries will be faster than misusing Pandas.
   - Break the code up into smaller modules, and implement intentional structure in the application directory as a whole.
+  - Move out of Jupyter Notebook files for "production"
   - Write unit tests with a high level of coverage (the process is fragile and interconnected - high test coverage would strengthen it across the board)
+  - Use 
+  - Create mult-step DockerFile to containerize the python code and Postgres database, each
+  - Implement a GitHub CI Actions to test build, run tests, measure coverage, and deploy to a cloud provider
 
 ## Goal
 
