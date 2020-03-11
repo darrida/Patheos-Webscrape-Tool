@@ -4,19 +4,20 @@
 
 - **NOTE:** This repository younger than the actual project. I moved it into GitHub last year with intention of rewriting the tool. That's still on the list. This code needs refactoring across almost every line (many many obvious design issues, which are glariingly obvious to me in 2020).
 - This was pretty much the **first** project I worked on while learning Python.
-- I approached learning Python (primarily using Jupyter) by **choosing a problem to solve**. The **"small task"** that I took on was to work toward downloading **every** blog post across Patheos.com (large, multi-section, multi-tenant blogging site). I bit off more than I could chew and had to rise to the occasion.
+- I approached learning Python (primarily using Jupyter) by **choosing a problem to solve**. The **"small task"** that I took on was to work toward downloading **every** blog post across Patheos.com (large, multi-section, multi-tenant blogging site). Patheos hosts hundreds of thousands of blog posts, with all of the variability of unstructured data that brings with it. I bit off more than I could chew and had to rise to the occasion.
+- Ultimately, in the midst of my very un-ideal code, I **successfully scraped, parsed, and inserted unstructured data** from over **350,000** blog posts into a PostgreSQL database.
 - **Required changes**
-  - Refactor gigantic functions into much smaller, ideally single task functionality (current status is very difficult to read, and writing unit tests would be a nearly impossible task)
-  - Move database connection and database data management into it's own class, and interact with it through a context manager
-  - Move data formats used to prepare information to be inserted into the database into classes as well (Uses would include data validattion before attempted database insertion)
-  - implement exception handlers across the board (in its current state it crashes upon encountering a form of unstructured data I hadn't designed it to process).
-  - Look into using dictionaries instead of Pandas (or even classes, to handle, validation transformation, logging, and errors immediately upon individual data scrape). Whichever is more accessible/readable. performance concerns with this process are not high. Either way, dictionaries will be faster than misusing Pandas.
-  - Break the code up into smaller modules, and implement intentional structure in the application directory as a whole.
+  - *Refactor gigantic functions* into much smaller, ideally single task functionality (current status is very difficult to read, and writing unit tests would be a nearly impossible task)
+  - Move *database connection and database data management into a class*, and interact with it through a *context manager*
+  - Move data formats used to prepare information to be inserted into the database into classes as well (Uses would include *data validattion* before attempted database insertion)
+  - implement *exception handlers* across the board (in its current state it crashes upon encountering a form of unstructured data I hadn't designed it to process).
+  - Look into using *dictionaries instead of Pandas* (or even classes, to handle, validation transformation, logging, and errors immediately upon individual data scrape). Whichever is *more accessible/readable*. performance concerns with this process are not high. Either way, *dictionaries will be faster than misusing Pandas* (obviously Pandas is incredibly fast when used properly - though, it does takea while to import before running code).
+  - *Break code up into smaller modules*, and implement *intentional structure in the application directory* as a whole.
   - Move out of Jupyter Notebook files for "production".
-  - Write unit tests with a high level of coverage (the process is fragile and interconnected - high test coverage would strengthen it across the board).
-  - Use cProfile to evaluate performance and eliminate bottlenecks.
-  - Create mult-step DockerFile to containerize the python code and Postgres database, each.
-  - Implement a GitHub CI Actions to test build, run tests, measure coverage, and deploy to a cloud provider.
+  - Write *unit tests* with a *high level of coverage* (the process is fragile and interconnected - high test coverage would strengthen it across the board).
+  - Use *cProfile* to evaluate performance and eliminate bottlenecks.
+  - Create mult-step *DockerFile* to containerize the python code and Postgres database, each.
+  - Implement a *GitHub CI* Actions to test *build*, run *tests*, measure *coverage*, and *deploy* to a cloud provider.
 
 ## Goal
 
@@ -29,7 +30,7 @@
 - PostgreSQL: Ultimately I landed on using Postgres, since experience with it would complement my Oracle experience.
 - Docker: My final version was hosted on my NAS using a Jupyter Lab container connected to a Postgres container. This was still really early on (in the 'bit off more that I could chew' phase), so I just downloaded the images from the Docker repository and (for Jupyter) made local directories available to the running container. I didn't yet understand how to write a DockerFile.
 
-## Proof of concepts for the following complete:
+## Proof of concepts for the following exist:
 
 Efficiently scraping:
 - categories
