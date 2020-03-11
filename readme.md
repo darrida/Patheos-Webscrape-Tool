@@ -2,10 +2,10 @@
 
 ## Learning Notes
 
-- **NOTE:** This repository younger than the actual project. I moved it into GitHub last year with intention of rewriting the tool. That's still on the list. This code needs refactoring across almost every line (many many obvious design issues, which are glariingly obvious to me in 2020).
+- **NOTE:** This repository younger than the actual project. *The project is several years old.* I moved it into GitHub last year with intention of rewriting the tool. That's still on the list. This code needs refactoring across almost every line (many many obvious design issues, which are glariingly obvious to me in 2020).
 - This was pretty much the **first** project I worked on while learning Python.
 - I approached learning Python (primarily using Jupyter) by **choosing a problem to solve**. The **"small task"** that I took on was to work toward downloading **every** blog post across Patheos.com (large, multi-section, multi-tenant blogging site). Patheos hosts hundreds of thousands of blog posts, with all of the variability of unstructured data that brings with it. I bit off more than I could chew and had to rise to the occasion.
-- Ultimately, in the midst of my very un-ideal code, I **successfully scraped, parsed, and inserted unstructured data** from over **350,000** blog posts into a PostgreSQL database.
+- Ultimately, in the midst of my very un-ideal code, my first challenge I took on to learn Python a few years ago **successfully scraped, parsed, and inserted unstructured data** from over **350,000** blog posts into a PostgreSQL database.
 - **Required changes**
   - **Refactor gigantic functions** into much smaller, ideally single task functionality (current status is very difficult to read, and writing unit tests would be a nearly impossible task)
   - Move database connection and database data management into a class, and interact with it through a **context manager**
