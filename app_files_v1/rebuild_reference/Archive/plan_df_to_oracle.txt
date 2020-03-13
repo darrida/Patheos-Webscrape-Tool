@@ -1,0 +1,5 @@
+### Proposed Idea:
+- For each row in the dataframe:
+  - (1) compare to the existing categories by performing a select and (1) seeing if a new category needs to be created and (2) acquire the key from that table
+  - (2) compare to the existing blogs in that category (using key) by performaing a select and (1) seeing a new blog needs to be created (and do so using the key from categories table) and (2) acquire the key from that table
+  - (3) compare to the existing posts for that blog (using key) by performing a select and (1) seeing if a new post needs to be created (and do so using the key from the blogs table)
