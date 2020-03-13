@@ -2,6 +2,7 @@
 
 ## Rebuild (for notes related to this, see "Learning Notes" below)
 
+- **NOTE:** Code prior to rebuild process can be found at commit 9b45b0dda3cef2a2d17f25617ef190f38093c94e
 - Rebuild process started
   - Started clean up of the messy direction organization
   - Started on the database classes (classes for objects to insert into tables, as well as database connection and manipulation
