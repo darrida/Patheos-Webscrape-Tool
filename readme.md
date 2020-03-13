@@ -5,7 +5,7 @@
 - Rebuild process started
   - Started clean up of the messy direction organization
   - Started on the database classes (classes for objects to insert into tables, as well as database connection and manipulation
-    - First pass was to build ORM classes, but decided to use raw SQL since this will mostly be a storage repository to insert and query a large number of records. The records will be used for stats and reports, not for application management
+    - First pass was to build ORM classes (orm_classes.py), but decided to use raw SQL (db_interface_sqlite.py) since this will mostly be a storage repository to insert and query a large number of records. The records will be used for stats and reports, not for application management
 
 ## Learning Notes
 
