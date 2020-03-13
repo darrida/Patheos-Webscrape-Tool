@@ -2,3 +2,5 @@ venv
 *.ipynb
 app_files_v1/poc-pull-cats.blogs.#ofposts.ipynb
 *.ipynb
+.ipynb.*
+__pycache__.*
