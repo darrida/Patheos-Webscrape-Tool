@@ -3,6 +3,7 @@ import sqlite3
 import os
 from pathlib import Path
 from datetime import datetime
+from datetime import date
 
 # PyPI
 
@@ -10,23 +11,24 @@ from datetime import datetime
 
 
 class website:
-    """Intended use is with an insert function into the website table."""
-    def __init__(self, id, name, url, last_date, last_user, create_date, create_user)
-        self.id          = id
+    """Intended use is with an insert function into the websites table."""
+    def __init__(self, name, url, id=None, last_date=None, last_user=None, create_date=None, create_user=None):
+        today = date.today()
+        self.id          = id if id != None else None
         self.name        = name
         self.url         = url
-        self.last_date   = last_date
-        self.last_user   = last_user
-        self.create_date = create_date
-        self.create_user = create_user
+        self.last_date   = today
+        self.last_user   = 'default'
+        self.create_date = today
+        self.create_user = 'default'
 
 
 class category:
-    """Intended use is with an insert function into the patheos_beliefs table."""
-    def __init__(self, id, name, tradition, url, website_id, last_date, create_date, create_user):
+    """Intended use is with an insert function into the categories table."""
+    def __init__(self, id, name, context, url, website_id, last_date, last_user, create_date, create_user):
         self.id          = id
         self.name        = name
-        self.tradition   = tradition
+        self.context     = context
         self.url         = url
         self.last_date   = last_date
         self.last_user   = last_user
@@ -35,8 +37,8 @@ class category:
     
     
 class blog:
-    """Intended use is with an insert function into the patheos_blogs table."""
-    def __init__(self, id, author, name, url, category_id, last_date, create_date, create_user):
+    """Intended use is with an insert function into the blogs table."""
+    def __init__(self, id, author, name, url, category_id, last_date, last_user, create_date, create_user):
         self.id          = id
         self.author      = author
         self.name        = name
@@ -49,9 +51,8 @@ class blog:
 
 
 class post:
-        """Intended use is with an insert function into the patheos_posts table."""
-    def __init__(self, id, title, author, date, tags, content, url, blog_id, last_date, last_user, c
-                 reate_date, create_user):
+    """Intended use is with an insert function into the pposts table."""
+    def __init__(self, id, title, author, date, tags, content, url, blog_id, last_date, last_user, create_date, create_user):
         self.id          = id
         self.title       = title
         self.author      = author
@@ -75,14 +76,14 @@ class database(object):
     """
     def __init__(self):
         __DB_LOCATION = (
-            Path.home() / "py_apps" / "_appdata" / "webscrape_patheos" / "patheos.db"
+            Path.home() / "py_apps" / "_appdata" / "blog_webscraper" / "patheos.db"
         )
         if os.path.exists(__DB_LOCATION):
             self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
             self.cur = self.__db_connection.cursor()
         else:
             Path(
-                Path.home() / "py_apps" / "_appdata" / "webscrape_patheos"
+                Path.home() / "py_apps" / "_appdata" / "blog_webscraper"
             ).mkdir(parents=True, exist_ok=True)
             self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
             self.cur = self.__db_connection.cursor()
@@ -104,6 +105,20 @@ class database(object):
             self.__db_connection.commit()
         self.__db_connection.close()
     
+
+    def query_websites(self, site_name):
+        result = self.cur.execute(f"""SELECT * FROM websites WHERE name = '{site_name}'""").fetchone()
+        if result:
+            return website(id          = result[0], # id
+                           name        = result[1], # name
+                           url         = result[2], # url
+                           last_date   = result[3], # last_date
+                           last_user   = result[4], # last_user
+                           create_date = result[5], # create_date
+                           create_user = result[6]) # create_user
+        else:
+            return None
+
     
     def execute(self, new_data: str) -> tuple:
         """Executes an valid SQL statement passed through as a string.
@@ -113,13 +128,33 @@ class database(object):
 
         """
         return self.cur.execute(new_data)
+    
 
-    
-    def executemany(self, many_new_data: str) -> None:
-        """Not currently in use.
+    def insert_website(self, website):
+        """Inserts a website record. Designed for use with the website class.
+
+        Arguments:
+            website (website class): class or dictionary containing the following values:
+                -
+
         """
-        self.cur.executemany("REPLACE INTO <table> VALUES(?, ?, ?, ?)", many_new_data)
-    
+        next_id = self.cur.execute("""SELECT MAX(id) FROM websites""").fetchone()[0]
+        if next_id:
+            next_id = next_id + 1 if next_id else 1
+        today = date.today()
+        return self.cur.execute(
+            f"""INSERT INTO websites
+                             VALUES (
+                                        NULL,
+                                        "{website.name}",
+                                        "{website.url}",
+                                        "{today}",
+                                        "user",
+                                        "{today}",
+                                        "user"
+                        )"""
+        )
+
     
     def insert_category(self, category):
         """Inserts a category record. Designed for use with the category class.
@@ -129,14 +164,15 @@ class database(object):
                 -
 
         """
-        category.id = self.cur.execute("""SELECT MAX(beliefs_number) FROM patheos_beliefs""").fetchone()[0]
+        category.id = self.cur.execute("""SELECT MAX(id) FROM categories""").fetchone()[0]
         category.id = category.id + 1 if category.id else 1
         self.cur.execute(
-            f"""INSERT INTO patheos_beliefs
+            f"""INSERT INTO categories
                              VALUES (
-                                        "{category.beliefs_number}",
-                                        "{category.beliefs_name}",
-                                        "{category.beliefs_url}",
+                                        "{category.id}",
+                                        "{category.name}",
+                                        "{category.url}",
+                                        "{category.website_id}",
                                         "{category.last_date}",
                                         "{category.last_user}",
                                         "{category.create_date}",
@@ -153,14 +189,15 @@ class database(object):
                 -
 
         """
-        blog.id = self.cur.execute("""SELECT MAX(blogs_number) FROM patheos_blogs""").fetchone()[0]
+        blog.id = self.cur.execute("""SELECT MAX(id) FROM blogs""").fetchone()[0]
         blog.id = blog.id + 1 if blog.id else 1
         self.cur.execute(
-            f"""INSERT INTO patheos_blogs
+            f"""INSERT INTO blogs
                              VALUES (
-                                        "{blog.blogs_number}",
-                                        "{blog.blogs_name}",
-                                        "{blog.blogs_url}",
+                                        "{blog.id}",
+                                        "{blog.name}",
+                                        "{blog.url}",
+                                        "{blog.category_id}",
                                         "{blog.last_date}",
                                         "{blog.last_user}",
                                         "{blog.create_date}",
@@ -169,7 +206,7 @@ class database(object):
         )
         
         
-        def insert_post(self, post):
+    def insert_post(self, post):
         """Inserts a category record. Designed for use with the category class.
 
         Arguments:
@@ -177,21 +214,22 @@ class database(object):
                 -
 
         """
-        post.id = self.cur.execute("""SELECT MAX(posts_number) FROM patheos_posts""").fetchone()[0]
+        post.id = self.cur.execute("""SELECT MAX(id) FROM posts""").fetchone()[0]
         post.id = post.id + 1 if post.id else 1
         self.cur.execute(
-            f"""INSERT INTO patheos_posts
-                             VALUES (
-                                        "{post.posts_number}",
-                                        "{post.posts_name}",
-                                        "{post.posts_url}",
+            f"""INSERT INTO posts
+                                VALUES (
+                                        "{post.id}",
+                                        "{post.name}",
+                                        "{post.url}",
+                                        "{post.blog_id}",
                                         "{post.last_date}",
                                         "{post.last_user}",
                                         "{post.create_date}",
                                         "{post.create_user}"
                         )"""
         )
-        
+
     
     def create_tables(self):
         """This function confirms the existence of or creates the path, database, and tables.
@@ -211,30 +249,42 @@ class database(object):
         """create a database table if it does not exist already"""
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS 
-                            patheos_beliefs (
-                                beliefs_number     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-                                beliefs_name       VARCHAR(100) NOT NULL, 
-                                beliefs_tradition  VARCHAR(100), 
-                                beliefs_url        VARCHAR(2000) NOT NULL,
-                                last_date          TIMESTAMP,
-                                last_user          VARCHAR(100),
-                                create_date        TIMESTAMP,
-                                create_user        VARCHAR(100)
+                            websites (
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+                                name         VARCHAR(100) NOT NULL, 
+                                url          VARCHAR(2000) NOT NULL,
+                                last_date    TIMESTAMP,
+                                last_user    VARCHAR(100),
+                                create_date  TIMESTAMP,
+                                create_user  VARCHAR(100)
+                        )"""
+        )
+        self.cur.execute(
+            """CREATE TABLE IF NOT EXISTS 
+                            categories (
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+                                name         VARCHAR(100) NOT NULL, 
+                                context    VARCHAR(100), 
+                                url          VARCHAR(2000) NOT NULL,
+                                website_id   INTEGER NOT NULL,
+                                last_date    TIMESTAMP,
+                                last_user    VARCHAR(100),
+                                create_date  TIMESTAMP,
+                                create_user  VARCHAR(100)
                         )"""
         )
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS
-                            patheos_blogs (
-                                blogs_number       INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-                                blogs_auther       VARCHAR(150),
-                                beliefs_number     INTEGER NOT NULL, 
-                                blogs_name         VARCHAR(255), 
-                                blogs_url          VARCHAR(2000) NOT NULL,
-                                last_date          TIMESTAMP,
-                                last_user          VARCHAR(100),
-                                create_date        TIMESTAMP,
-                                create_user        VARCHAR(100),
-                                FOREIGN KEY (beliefs_number) REFERENCES patheos_beliefs(beliefs_number)
+                            blogs (
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+                                auther       VARCHAR(150),
+                                name         VARCHAR(255), 
+                                url          VARCHAR(2000) NOT NULL,
+                                category_id  INTEGER NOT NULL, 
+                                last_date    TIMESTAMP,
+                                last_user    VARCHAR(100),
+                                create_date  TIMESTAMP,
+                                create_user  VARCHAR(100)
                     )"""
         )
         self.cur.execute(
@@ -255,3 +305,8 @@ class database(object):
                                 FOREIGN KEY (blogs_number) REFERENCES patheo_blogs(blogs_number)
                     )"""
         )
+    def commit(self):
+        """Use after any other database class function to commit changes.
+        This function is separated from initial transactions to enable the __exit__ function to rollback changes in the case that errors are encountered.
+        """
+        self.__db_connection.commit()
