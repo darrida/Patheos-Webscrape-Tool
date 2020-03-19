@@ -151,7 +151,7 @@ class database(object):
             new_data (string): Valid SQL statement
 
         """
-        return self.cur.execute(new_data)
+        return self.cur.execute(new_data).fetchall()
     
 
     def insert_website(self, website: object) -> object:
@@ -314,7 +314,7 @@ class database(object):
         )
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS
-                            patheos_posts (
+                            posts (
                                 posts_number       INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 posts_title V      ARCHAR(255) NOT NULL, 
                                 blogs_number       INTEGER NOT NULL, 
