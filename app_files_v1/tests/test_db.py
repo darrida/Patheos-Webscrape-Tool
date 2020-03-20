@@ -31,21 +31,47 @@ def test_create_tables():
     connection = sqlite3.connect(str(__DB_LOCATION))
     with data.database(connection) as db:
         db.create_tables()
-        result = db.execute('SELECT name FROM sqlite_master WHERE type=\'table\'')# AND name=\'websites\'')   
-    assert result[0][0] == 'websites'
-    assert result[2][0] == 'categories'
-    assert result[3][0] == 'blogs'
-    assert result[4][0] == 'posts'
+        websites   = db.execute('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'websites\'')
+        categories = db.execute('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'categories\'')
+        blogs      = db.execute('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'blogs\'')
+        posts      = db.execute('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'posts\'')
+    assert websites[0][0] == 'websites'
+    assert categories[0][0] == 'categories'
+    assert blogs[0][0] == 'blogs'
+    assert posts[0][0] == 'posts'
 
 
-def test_insert_website(test_database=None):
-    if test_database == None:
-        test_database = sqlite3.connect("file::memory:?cache=shared")
-    with data.database(test_database) as db:
+def test_insert_website(connection=None):
+    if connection == None:
+        __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
+        connection = sqlite3.connect(str(__DB_LOCATION))
+    with data.database(connection) as db:
         w = data.website(name='Patheos Blogs', url='https://www.patheos.com/blogs')
         db.insert_website(w)
         result = db.execute('SELECT url FROM websites WHERE name = \'Patheos Blogs\'')
-    assert result[0] == 'https://www.patheos.com/blogs'
+    assert result[0][0] == 'https://www.patheos.com/blogs'
+
+
+def test_insert_category(connection=None):
+    if connection == None:
+        __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
+        connection = sqlite3.connect(str(__DB_LOCATION))
+    with data.database(connection) as db:
+        c = data.category(name='Buddhist Blogs', context='Context', url='https://www.patheos.com/buddhist-blogs', website_id=1)
+        db.insert_category(c)
+        result = db.execute('SELECT name FROM categories WHERE name = \'Buddhist Blogs\'')
+    assert result[0][0] == 'Buddhist Blogs'
+
+
+def test_insert_blog(connection=None):
+    if connection == None:
+        __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
+        connection = sqlite3.connect(str(__DB_LOCATION))
+    with data.database(connection) as db:
+        c = data.blog(name='Buddhist Blogs', context='Context', url='https://www.patheos.com/buddhist-blogs', website_id=1)
+        db.insert_category(c)
+        result = db.execute('SELECT name FROM categories WHERE name = \'Buddhist Blogs\'')
+    assert result[0][0] == 'Buddhist Blogs'
 
 
 def test_teardown_install_files():

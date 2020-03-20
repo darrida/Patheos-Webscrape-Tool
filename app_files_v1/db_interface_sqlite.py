@@ -216,7 +216,7 @@ class database(object):
         """
         blog.id = self.cur.execute("""SELECT MAX(id) FROM blogs""").fetchone()[0]
         blog.id = blog.id + 1 if blog.id else 1
-        self.cur.execute(
+        return self.cur.execute(
             f"""INSERT INTO blogs
                              VALUES (
                                         "{blog.id}",
