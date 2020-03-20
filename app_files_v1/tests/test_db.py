@@ -68,10 +68,10 @@ def test_insert_blog(connection=None):
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
     with data.database(connection) as db:
-        c = data.blog(name='Buddhist Blogs', context='Context', url='https://www.patheos.com/buddhist-blogs', website_id=1)
-        db.insert_category(c)
-        result = db.execute('SELECT name FROM categories WHERE name = \'Buddhist Blogs\'')
-    assert result[0][0] == 'Buddhist Blogs'
+        b = data.blog(author='darrida', name='American Buddhist', url='https://www.patheos.com/blogs/americanbuddhist/', category_id=1)
+        db.insert_blog(b)
+        result = db.execute('SELECT url FROM blogs WHERE name = \'American Buddhist\'')
+    assert result[0][0] == 'https://www.patheos.com/blogs/americanbuddhist/'
 
 
 def test_teardown_install_files():

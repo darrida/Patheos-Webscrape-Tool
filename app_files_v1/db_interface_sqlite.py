@@ -220,6 +220,7 @@ class database(object):
             f"""INSERT INTO blogs
                              VALUES (
                                         "{blog.id}",
+                                        "{blog.author}",
                                         "{blog.name}",
                                         "{blog.url}",
                                         "{blog.category_id}",
