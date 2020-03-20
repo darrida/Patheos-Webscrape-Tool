@@ -79,6 +79,7 @@ class post:
         self.tags        = tags
         self.content     = content
         self.url         = url
+        self.blog_id     = blog_id
         self.last_date   = last_date
         self.last_user   = last_user
         self.create_date = create_date
@@ -246,7 +247,11 @@ class database(object):
             f"""INSERT INTO posts
                                 VALUES (
                                         "{post.id}",
-                                        "{post.name}",
+                                        "{post.title}",
+                                        "{post.author}",
+                                        "{post.date}",
+                                        "{post.tags}",
+                                        "{post.content}",
                                         "{post.url}",
                                         "{post.blog_id}",
                                         "{post.last_date}",
@@ -303,9 +308,9 @@ class database(object):
             """CREATE TABLE IF NOT EXISTS
                             blogs (
                                 id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-                                auther       VARCHAR(150),
+                                auther       VARCHAR(255),
                                 name         VARCHAR(255), 
-                                url          VARCHAR(2000) NOT NULL,
+                                url          TEXT NOT NULL,
                                 category_id  INTEGER NOT NULL, 
                                 last_date    TIMESTAMP,
                                 last_user    VARCHAR(100),
@@ -316,19 +321,18 @@ class database(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS
                             posts (
-                                posts_number       INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-                                posts_title V      ARCHAR(255) NOT NULL, 
-                                blogs_number       INTEGER NOT NULL, 
-                                posts_author       VARCHAR(255), 
-                                posts_date         DATE, 
-                                posts_tags         VARCHAR(255), 
-                                posts_content      TEXT, 
-                                posts_url          VARCHAR(2000) NOT NULL,
-                                last_date          TIMESTAMP,
-                                last_user          VARCHAR(100),
-                                create_date        TIMESTAMP,
-                                create_user        VARCHAR(100),
-                                FOREIGN KEY (blogs_number) REFERENCES patheo_blogs(blogs_number)
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+                                title        VARCHAR(255) NOT NULL,
+                                author       VARCHAR(255),
+                                date         TIMESTAMP, 
+                                tags         VARCHAR(255), 
+                                content      TEXT, 
+                                url          TEXT NOT NULL,
+                                blog_id     INTEGER NOT NULL,
+                                last_date    TIMESTAMP,
+                                last_user    VARCHAR(100),
+                                create_date  TIMESTAMP,
+                                create_user  VARCHAR(100)
                     )"""
         )
     def commit(self):
