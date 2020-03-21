@@ -6,14 +6,10 @@ import os
 from datetime import date
 
 # PyPI
-import pytest
+#import pytest
 
 # LOCAL
 from .. import db_interface_sqlite as data
-
-
-def test_test():
-    assert True
 
 
 def test_create_test_db():
@@ -45,7 +41,7 @@ def test_create_tables():
     assert posts[0][0] == 'posts'
 
 
-def test_insert_website(connection=None):
+def test_insert_website_and_pk(connection=None):
     if connection == None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
@@ -60,7 +56,7 @@ def test_insert_website(connection=None):
     assert result_2[0][0] == 2
 
 
-def test_insert_category(connection=None):
+def test_insert_category_and_pk(connection=None):
     if connection == None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
@@ -81,7 +77,7 @@ def test_insert_category(connection=None):
     assert result_2[0][0] == 2
 
 
-def test_insert_blog(connection=None):
+def test_insert_blog_and_pk(connection=None):
     if connection == None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
@@ -102,7 +98,7 @@ def test_insert_blog(connection=None):
     assert result_2[0][0] == 2
 
 
-def test_insert_post(connection=None):
+def test_insert_post_and_pk(connection=None):
     if connection == None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
@@ -128,6 +124,14 @@ def test_insert_post(connection=None):
     assert result[0][0] == 'JUSTIN WHITAKER'
     assert result_2[0][0] == 2
 
+
+def test_query_posts_count(connection=None):
+        if connection == None:
+            __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
+        connection = sqlite3.connect(str(__DB_LOCATION))
+        with data.database(connection) as db:
+            result = db.execute('SELECT count(id) FROM posts')
+        assert result[0][0] == 2
 
 def test_query_websites(connection=None):
     if connection == None:
