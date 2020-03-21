@@ -50,7 +50,7 @@ class category:
 class blog:
     """Intended use is with an insert function into the blogs table."""
     today = date.today()
-    def __init__(self, author, name, url, 
+    def __init__(self, author=None, name=None, url=None, 
                  id=None, category_id=None, 
                  last_date=today, last_user='default', 
                  create_date=today, create_user='default'):
@@ -141,6 +141,23 @@ class database(object):
                            last_user   = result[4], # last_user
                            create_date = result[5], # create_date
                            create_user = result[6]) # create_user
+        else:
+            return None
+
+
+    def query_categories(self, name):
+        result = self.cur.execute(f"""SELECT * FROM categories WHERE name = '{name}'""").fetchone()
+        if result:
+            return category(id          = result[0], # id
+                            name        = result[1], # name
+                            context     = result[2], # context
+                            url         = result[3], # url
+                            website_id  = result[4], # website_id
+                            last_date   = result[5], # last_date
+                            last_user   = result[6], # last_user
+                            create_date = result[7], # create_date
+                            create_user = result[8]) # create_user)
+            #return result
         else:
             return None
 
