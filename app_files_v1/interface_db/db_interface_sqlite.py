@@ -9,27 +9,38 @@ from datetime import date
 
 # LOCAL
 
+# Variables to make pylint happy
+test_database=None
+
 
 class website:
     """Intended use is with an insert function into the websites table."""
-    def __init__(self, name, url, id=None, last_date=None, last_user=None, create_date=None, create_user=None):
-        today = date.today()
+    today = date.today()
+    def __init__(self, name, url, 
+                 id=None, 
+                 last_date=today, last_user='default', 
+                 create_date=today, create_user='default'):
         self.id          = id if id != None else None
         self.name        = name
         self.url         = url
-        self.last_date   = today
-        self.last_user   = 'default'
-        self.create_date = today
-        self.create_user = 'default'
+        self.last_date   = last_date
+        self.last_user   = last_user
+        self.create_date = create_date
+        self.create_user = create_user
 
 
 class category:
     """Intended use is with an insert function into the categories table."""
-    def __init__(self, id, name, context, url, website_id, last_date, last_user, create_date, create_user):
-        self.id          = id
+    today = date.today()
+    def __init__(self, name=None, url=None, website_id=None,
+                 id=None, context=None,
+                 last_date=today, last_user='default',
+                 create_date=today, create_user='default'):
+        self.id          = id if id != None else None
         self.name        = name
         self.context     = context
         self.url         = url
+        self.website_id  = website_id
         self.last_date   = last_date
         self.last_user   = last_user
         self.create_date = create_date
@@ -38,7 +49,11 @@ class category:
     
 class blog:
     """Intended use is with an insert function into the blogs table."""
-    def __init__(self, id, author, name, url, category_id, last_date, last_user, create_date, create_user):
+    today = date.today()
+    def __init__(self, author=None, name=None, url=None, 
+                 id=None, category_id=None, 
+                 last_date=today, last_user='default', 
+                 create_date=today, create_user='default'):
         self.id          = id
         self.author      = author
         self.name        = name
@@ -52,7 +67,11 @@ class blog:
 
 class post:
     """Intended use is with an insert function into the pposts table."""
-    def __init__(self, id, title, author, date, tags, content, url, blog_id, last_date, last_user, create_date, create_user):
+    today = date.today()
+    def __init__(self, title, author, date, tags, content, url, 
+                 id=None, blog_id=None, 
+                 last_date=today, last_user='default',
+                 create_date=today, create_user='default'):
         self.id          = id
         self.title       = title
         self.author      = author
@@ -60,6 +79,7 @@ class post:
         self.tags        = tags
         self.content     = content
         self.url         = url
+        self.blog_id     = blog_id
         self.last_date   = last_date
         self.last_user   = last_user
         self.create_date = create_date
@@ -74,29 +94,34 @@ class database(object):
     uncommitted transactions they will be rolled back prior to connection closure.
     
     """
-    def __init__(self):
-        __DB_LOCATION = (
-            Path.home() / "py_apps" / "_appdata" / "blog_webscraper" / "patheos.db"
-        )
-        if os.path.exists(__DB_LOCATION):
-            self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
+    def __init__(self, test_database=None):
+        if test_database:
+            self.__db_connection = test_database
             self.cur = self.__db_connection.cursor()
         else:
-            Path(
-                Path.home() / "py_apps" / "_appdata" / "blog_webscraper"
-            ).mkdir(parents=True, exist_ok=True)
-            self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
-            self.cur = self.__db_connection.cursor()
-            
-    
+            __DB_LOCATION = (
+                Path.home() 
+                / "py_apps" 
+                / "_appdata" 
+                / "webscraper"
+                / "webscraper.db"
+            )
+            if os.path.exists(__DB_LOCATION):
+                self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
+                self.cur = self.__db_connection.cursor()
+            else:
+                Path(
+                    Path.home() / "py_apps" / "_appdata" / "webscraper"
+                ).mkdir(parents=True, exist_ok=True)
+                self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
+                self.cur = self.__db_connection.cursor()
+
     def __del__(self):
         self.__db_connection.close()
 
-    
     def __enter__(self):
         return self
 
-    
     def __exit__(self, ext_type, exc_value, traceback):
         self.cur.close()
         if isinstance(exc_value, Exception):
@@ -119,6 +144,23 @@ class database(object):
         else:
             return None
 
+
+    def query_categories(self, name):
+        result = self.cur.execute(f"""SELECT * FROM categories WHERE name = '{name}'""").fetchone()
+        if result:
+            return category(id          = result[0], # id
+                            name        = result[1], # name
+                            context     = result[2], # context
+                            url         = result[3], # url
+                            website_id  = result[4], # website_id
+                            last_date   = result[5], # last_date
+                            last_user   = result[6], # last_user
+                            create_date = result[7], # create_date
+                            create_user = result[8]) # create_user)
+            #return result
+        else:
+            return None
+
     
     def execute(self, new_data: str) -> tuple:
         """Executes an valid SQL statement passed through as a string.
@@ -127,10 +169,10 @@ class database(object):
             new_data (string): Valid SQL statement
 
         """
-        return self.cur.execute(new_data)
+        return self.cur.execute(new_data).fetchall()
     
 
-    def insert_website(self, website):
+    def insert_website(self, website: object) -> object:
         """Inserts a website record. Designed for use with the website class.
 
         Arguments:
@@ -166,11 +208,12 @@ class database(object):
         """
         category.id = self.cur.execute("""SELECT MAX(id) FROM categories""").fetchone()[0]
         category.id = category.id + 1 if category.id else 1
-        self.cur.execute(
+        return self.cur.execute(
             f"""INSERT INTO categories
                              VALUES (
                                         "{category.id}",
                                         "{category.name}",
+                                        "{category.context}",
                                         "{category.url}",
                                         "{category.website_id}",
                                         "{category.last_date}",
@@ -191,10 +234,11 @@ class database(object):
         """
         blog.id = self.cur.execute("""SELECT MAX(id) FROM blogs""").fetchone()[0]
         blog.id = blog.id + 1 if blog.id else 1
-        self.cur.execute(
+        return self.cur.execute(
             f"""INSERT INTO blogs
                              VALUES (
                                         "{blog.id}",
+                                        "{blog.author}",
                                         "{blog.name}",
                                         "{blog.url}",
                                         "{blog.category_id}",
@@ -220,7 +264,11 @@ class database(object):
             f"""INSERT INTO posts
                                 VALUES (
                                         "{post.id}",
-                                        "{post.name}",
+                                        "{post.title}",
+                                        "{post.author}",
+                                        "{post.date}",
+                                        "{post.tags}",
+                                        "{post.content}",
                                         "{post.url}",
                                         "{post.blog_id}",
                                         "{post.last_date}",
@@ -264,7 +312,7 @@ class database(object):
                             categories (
                                 id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 name         VARCHAR(100) NOT NULL, 
-                                context    VARCHAR(100), 
+                                context      VARCHAR(100), 
                                 url          VARCHAR(2000) NOT NULL,
                                 website_id   INTEGER NOT NULL,
                                 last_date    TIMESTAMP,
@@ -277,9 +325,9 @@ class database(object):
             """CREATE TABLE IF NOT EXISTS
                             blogs (
                                 id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-                                auther       VARCHAR(150),
+                                auther       VARCHAR(255),
                                 name         VARCHAR(255), 
-                                url          VARCHAR(2000) NOT NULL,
+                                url          TEXT NOT NULL,
                                 category_id  INTEGER NOT NULL, 
                                 last_date    TIMESTAMP,
                                 last_user    VARCHAR(100),
@@ -289,20 +337,19 @@ class database(object):
         )
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS
-                            patheos_posts (
-                                posts_number       INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-                                posts_title V      ARCHAR(255) NOT NULL, 
-                                blogs_number       INTEGER NOT NULL, 
-                                posts_author       VARCHAR(255), 
-                                posts_date         DATE, 
-                                posts_tags         VARCHAR(255), 
-                                posts_content      TEXT, 
-                                posts_url          VARCHAR(2000) NOT NULL,
-                                last_date          TIMESTAMP,
-                                last_user          VARCHAR(100),
-                                create_date        TIMESTAMP,
-                                create_user        VARCHAR(100),
-                                FOREIGN KEY (blogs_number) REFERENCES patheo_blogs(blogs_number)
+                            posts (
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+                                title        VARCHAR(255) NOT NULL,
+                                author       VARCHAR(255),
+                                date         TIMESTAMP, 
+                                tags         VARCHAR(255), 
+                                content      TEXT, 
+                                url          TEXT NOT NULL,
+                                blog_id     INTEGER NOT NULL,
+                                last_date    TIMESTAMP,
+                                last_user    VARCHAR(100),
+                                create_date  TIMESTAMP,
+                                create_user  VARCHAR(100)
                     )"""
         )
     def commit(self):
