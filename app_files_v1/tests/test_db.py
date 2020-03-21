@@ -9,7 +9,7 @@ from datetime import date
 #import pytest
 
 # LOCAL
-from .. import db_interface_sqlite as data
+from ..interface_db import db_interface_sqlite as data
 
 
 def test_create_test_db():

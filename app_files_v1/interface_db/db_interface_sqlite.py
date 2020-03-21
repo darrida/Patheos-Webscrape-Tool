@@ -32,8 +32,8 @@ class website:
 class category:
     """Intended use is with an insert function into the categories table."""
     today = date.today()
-    def __init__(self, name, context, url, 
-                 id=None, website_id=None, 
+    def __init__(self, name, url, website_id,
+                 id=None, context=None,
                  last_date=today, last_user='default',
                  create_date=today, create_user='default'):
         self.id          = id if id != None else None
