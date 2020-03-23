@@ -68,7 +68,7 @@ class blog:
 class post:
     """Intended use is with an insert function into the pposts table."""
     today = date.today()
-    def __init__(self, title, author, date, tags, content, url, 
+    def __init__(self, title=None, author=None, date=None, tags=None, content=None, url=None, 
                  id=None, blog_id=None, 
                  last_date=today, last_user='default',
                  create_date=today, create_user='default'):
@@ -157,6 +157,42 @@ class database(object):
                             last_user   = result[6], # last_user
                             create_date = result[7], # create_date
                             create_user = result[8]) # create_user)
+            #return result
+        else:
+            return None
+
+
+    def query_blogs(self, url):
+        result = self.cur.execute(f"""SELECT * FROM posts WHERE url = '{url}'""").fetchone()
+        if result:
+            return blog(id          = result[0],  # id
+                        author      = result[2],  # author
+                        name        = result[3],  # name
+                        url         = result[4],  # url
+                        category_id = result[5],  # category_id
+                        last_date   = result[6],  # last_date
+                        last_user   = result[7],  # last_user
+                        create_date = result[8], # create_date
+                        create_user = result[9]) # create_user)
+        else:
+            return None
+
+
+    def query_posts(self, url):
+        result = self.cur.execute(f"""SELECT * FROM posts WHERE url = '{url}'""").fetchone()
+        if result:
+            return post(id          = result[0],  # id
+                        title       = result[1],  # title
+                        author      = result[2],  # author
+                        date        = result[3],  # date
+                        tags        = result[4],  # tags
+                        content     = result[5],  # content
+                        url         = result[6],  # url
+                        blog_id     = result[7],  # blog_id
+                        last_date   = result[8],  # last_date
+                        last_user   = result[9],  # last_user
+                        create_date = result[10], # create_date
+                        create_user = result[11]) # create_user)
             #return result
         else:
             return None
