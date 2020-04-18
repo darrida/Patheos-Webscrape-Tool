@@ -131,8 +131,13 @@ class database(object):
         self.__db_connection.close()
     
 
-    def query_websites(self, site_name):
-        result = self.cur.execute(f"""SELECT * FROM websites WHERE name = '{site_name}'""").fetchone()
+    def query_websites(self, name=None, url=None):
+        if name:
+            result = self.cur.execute(f"""SELECT * FROM websites WHERE name = '{name}'""").fetchone()
+        elif url:
+            result = self.cur.execute(f"""SELECT * FROM websites WHERE url = '{url}'""").fetchone()
+        else:
+            return 'query_websites() requires name or url'
         if result:
             return website(id          = result[0], # id
                            name        = result[1], # name
@@ -180,13 +185,16 @@ class database(object):
                 -
 
         """
-        next_id = self.cur.execute("""SELECT MAX(id) FROM websites""").fetchone()[0]
-        if next_id:
-            next_id = next_id + 1 if next_id else 1
-        today = date.today()
-        return self.cur.execute(
-            f"""INSERT INTO websites
-                             VALUES (
+        existing_url = self.query_websites(url=website.url)
+        new = True if existing_url == None else False
+        if new == True:
+            next_id = self.cur.execute("""SELECT MAX(id) FROM websites""").fetchone()[0]
+            if next_id:
+                next_id = next_id + 1 if next_id else 1
+            today = date.today()
+            self.cur.execute(
+                f"""INSERT INTO websites
+                                VALUES (
                                         NULL,
                                         "{website.name}",
                                         "{website.url}",
@@ -194,8 +202,11 @@ class database(object):
                                         "user",
                                         "{today}",
                                         "user"
-                        )"""
-        )
+                            )"""
+            ).fetchall()
+            return self.query_websites(url=website.url)
+        else:
+            return f'Not inserted. If exists, then {existing_url.url} is already present, named {existing_url.name}.'
 
     
     def insert_category(self, category):
@@ -352,6 +363,25 @@ class database(object):
                                 create_user  VARCHAR(100)
                     )"""
         )
+
+
+    def check_url_new(self, table: str, url: str) -> bool:
+        """Check a URL against a database table to see if it already exists.
+        
+        Arguments:
+            url (str): webpage page address to check against database table
+            table (str): database table to check against
+
+        Return
+            bool: True if url exists in given table; False if it doesn't exist.
+        
+        """
+        existing_url = self.cur.execute(f'SELECT url FROM {table} WHERE url = \'{url}\'')
+        if len(existing_url) == 0:
+            return True
+        else: 
+            return False
+
     def commit(self):
         """Use after any other database class function to commit changes.
         This function is separated from initial transactions to enable the __exit__ function to rollback changes in the case that errors are encountered.
