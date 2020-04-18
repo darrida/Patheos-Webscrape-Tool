@@ -143,9 +143,10 @@ media
 static
 
 # VSCode
-.vscode/
+.vscode/*
 settings.json
 venv
 app_files_v1/poc-pull-cats.blogs.#ofposts.ipynb
 .ipynb.*
 __pycache__.*
+Patheos-Webscrape-Tools.code-workspace
