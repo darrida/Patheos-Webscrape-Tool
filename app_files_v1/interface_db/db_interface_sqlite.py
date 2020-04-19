@@ -131,11 +131,13 @@ class database(object):
         self.__db_connection.close()
     
 
-    def query_websites(self, name=None, url=None):
+    def query_websites(self, name=None, url=None, website_id=None):
         if name:
             result = self.cur.execute(f"""SELECT * FROM websites WHERE name = '{name}'""").fetchone()
         elif url:
             result = self.cur.execute(f"""SELECT * FROM websites WHERE url = '{url}'""").fetchone()
+        elif website_id:
+            result = self.cur.execute(f"""SELECT * FROM websites WHERE id = '{website_id}'""").fetchone()
         else:
             return 'query_websites() requires name or url'
         if result:
@@ -150,8 +152,11 @@ class database(object):
             return None
 
 
-    def query_categories(self, name):
-        result = self.cur.execute(f"""SELECT * FROM categories WHERE name = '{name}'""").fetchone()
+    def query_categories(self, name=None, category_id=None):
+        if name:
+            result = self.cur.execute(f"""SELECT * FROM categories WHERE name = '{name}'""").fetchone()
+        if category_id:
+            result = self.cur.execute(f"""SELECT * FROM categories WHERE id = '{category_id}'""").fetchone()
         if result:
             return category(id          = result[0], # id
                             name        = result[1], # name
@@ -163,6 +168,22 @@ class database(object):
                             create_date = result[7], # create_date
                             create_user = result[8]) # create_user)
             #return result
+        else:
+            return None
+
+    
+    def query_blogs(self, name):
+        result = self.cur.execute(f"""SELECT * FROM blogs WHERE name = '{name}'""").fetchone()
+        if result:
+            return blog(id          = result[0], # id
+                        author      = result[1], # name
+                        name        = result[2], # context
+                        url         = result[3], # url
+                        category_id = result[4], # website_id
+                        last_date   = result[5], # last_date
+                        last_user   = result[6], # last_user
+                        create_date = result[7], # create_date
+                        create_user = result[8]) # create_user)
         else:
             return None
 
