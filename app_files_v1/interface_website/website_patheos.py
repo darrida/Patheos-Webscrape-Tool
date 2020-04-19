@@ -1,3 +1,6 @@
+# Standard
+import sys
+
 # PyPI
 from bs4 import BeautifulSoup as BS
 import requests
@@ -102,3 +105,40 @@ def fetch_and_insert_blogs(category_name: str) -> tools.insert_results:
 # with data.database() as db:
 #     result = db.execute("SELECT * FROM blogs where name = 'ReImagine'")
 #     print(result)
+
+
+
+def number_of_blog_pages(blog_name: str) -> int:
+    with data.database() as db:
+        blog = db.query_blogs(blog_name)
+        base_page_url = blog.url + '/page/'
+        try:
+            result = db.execute(f"SELECT number FROM site_pages WHERE site_id = {blog.id}")[0][0]
+            valid_page = result if result > 1 else 1
+        except IndexError:
+            valid_page = 1
+        original_number = valid_page
+        p = valid_page
+        search_increment_list = [100, 10, 1, 0]
+        search_list_index = 0
+        while search_increment_list[search_list_index] != 0:                            # Continue processing until the increment number = 0
+            try:
+                search_increment = search_increment_list[search_list_index]
+                url = base_page_url + str(p)
+                url_test = requests.get(url)
+                #print('search_list_index', search_list_index)
+                if url_test.status_code != 404:                                         # While request.get is successful, continue incrementing
+                    valid_page = p
+                    p += search_increment
+                else:                                                                   # When request.get gets 404 error, move to smaller increment
+                    search_list_index += 1
+                    p = (p - search_increment) + search_increment_list[search_list_index]
+                #print('search_increment', search_increment)
+                #print('code', url_test.status_code, '=>', p)
+                #print('valid_page', valid_page)
+                #print('')
+            except IndexError as e:
+                search_increment = 0
+            db.insert_update_site_pages(valid_page, blog.id)
+            sys.stdout.write('\r' + str(valid_page))
+    return valid_page - original_number

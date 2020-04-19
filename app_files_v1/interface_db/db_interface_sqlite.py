@@ -198,6 +198,60 @@ class database(object):
         return self.cur.execute(new_data).fetchall()
     
 
+    def insert_update_site_pages(self, page_number: int, site_id: int):
+        """Inserts a website record. Designed for use with the website class.
+
+        Arguments:
+            website (website class): class or dictionary containing the following values:
+                -
+
+        """
+        # existing_url = self.insert_update_website(url=website.url)
+        # new = True if existing_url == None else False
+        today = date.today()
+        try:
+            result = self.cur.execute(f"SELECT number FROM site_pages WHERE site_id = {site_id}").fetchall()
+            #print(result)
+            if result[0]:
+                self.cur.execute(
+                    f"""UPDATE site_pages
+                        SET number = '{page_number}',
+                            last_date = '{today}',
+                            last_user = 'user'
+                        WHERE site_id = '{site_id}'
+                    """
+                )
+            #print('updated or same')
+        except IndexError:
+            next_id = self.cur.execute("""SELECT MAX(id) FROM site_pages""").fetchone()[0]
+            next_id = next_id + 1 if next_id else 1
+            self.cur.execute(
+                f"""INSERT INTO site_pages
+                                VALUES (
+                                        NULL,
+                                        "{page_number}",
+                                        "{site_id}",
+                                        "{today}",
+                                        "user",
+                                        "{today}",
+                                        "user"
+                            )"""
+            ).fetchall()
+            #print('new')
+        # else:
+        #     self.cur.execute(
+        #         f"""UPDATE websites
+        #             SET number = '{page_number}',
+        #                 last_date = '{today}',
+        #                 last_user = 'user'
+        #             WHERE website_id = '{website_id}'
+        #         """
+        #     ).fetchall()
+        #     return self.query_websites(url=website.url)
+        # else:
+        #     return f'Not inserted. If exists, then {existing_url.url} is already present, named {existing_url.name}.'
+
+
     def insert_website(self, website: object) -> object:
         """Inserts a website record. Designed for use with the website class.
 
@@ -330,10 +384,10 @@ class database(object):
         """create a database table if it does not exist already"""
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS 
-                            websites_pages (
+                            site_pages (
                                 id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 number       INTEGER NOT NULL,
-                                website_id   INTEGER NOT NULL,
+                                site_id      INTEGER NOT NULL UNIQUE,
                                 last_date    TIMESTAMP,
                                 last_user    VARCHAR(100),
                                 create_date  TIMESTAMP,
