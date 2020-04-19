@@ -330,6 +330,18 @@ class database(object):
         """create a database table if it does not exist already"""
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS 
+                            websites_pages (
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+                                number       INTEGER NOT NULL,
+                                website_id   INTEGER NOT NULL,
+                                last_date    TIMESTAMP,
+                                last_user    VARCHAR(100),
+                                create_date  TIMESTAMP,
+                                create_user  VARCHAR(100)
+                        )"""
+        )
+        self.cur.execute(
+            """CREATE TABLE IF NOT EXISTS 
                             websites (
                                 id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 name         VARCHAR(100) NOT NULL, 
