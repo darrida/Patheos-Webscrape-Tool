@@ -68,7 +68,7 @@ class blog:
 class post:
     """Intended use is with an insert function into the pposts table."""
     today = date.today()
-    def __init__(self, title, author, date, tags, content, url, 
+    def __init__(self, title=None, author=None, date=None, tags=None, content=None, content_html=None, url=None, 
                  id=None, blog_id=None, 
                  last_date=today, last_user='default',
                  create_date=today, create_user='default'):
@@ -78,6 +78,7 @@ class post:
         self.date        = date
         self.tags        = tags
         self.content     = content
+        self.content_html= content_html
         self.url         = url
         self.blog_id     = blog_id
         self.last_date   = last_date

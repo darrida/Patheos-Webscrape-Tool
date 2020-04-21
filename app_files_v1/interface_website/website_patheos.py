@@ -13,7 +13,7 @@ from interface_website import website_tools as tools
 
 def insert_website(website_name: str, website_url: str) -> data.website:
     website = data.website(name = website_name, url = website_url)
-    results = tools.insert_results()
+    #results = tools.insert_results()
     with data.database() as db:
         print(f'Inserting {website_name} - {website_url}')
         result = db.insert_website(website)
@@ -137,8 +137,20 @@ def number_of_blog_pages(blog_name: str) -> int:
                 #print('code', url_test.status_code, '=>', p)
                 #print('valid_page', valid_page)
                 #print('')
-            except IndexError as e:
+            except IndexError:
                 search_increment = 0
             db.insert_update_site_pages(valid_page, blog.id)
             sys.stdout.write('\r' + str(valid_page))
     return valid_page - original_number
+
+
+def scrape_posts_on_page(blog_page_url: str) -> list:
+    page_post_urls_l = []
+    response = requests.get(blog_page_url)
+    if response.status_code != 404:
+        parsed_content = BS(response.content, 'html.parser')
+        for post_url in parsed_content.find_all('h2', attrs={"class":"entry-title"}):
+            post_a = post_url.find('a')
+            post_href = post_a['href']
+            page_post_urls_l.append(post_href)
+    return page_post_urls_l
