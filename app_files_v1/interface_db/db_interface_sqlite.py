@@ -323,18 +323,16 @@ class database(object):
         blog.id = blog.id + 1 if blog.id else 1
         blog.name = blog.name.replace('"', '')
         return self.cur.execute(
-            f"""INSERT INTO blogs
-                             VALUES (
-                                        "{blog.id}",
-                                        "{blog.author}",
-                                        "{blog.name}",
-                                        "{blog.url}",
-                                        "{blog.category_id}",
-                                        "{blog.last_date}",
-                                        "{blog.last_user}",
-                                        "{blog.create_date}",
-                                        "{blog.create_user}"
-                        )"""
+            f"""INSERT INTO blogs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, )""",
+                                       (blog.id,
+                                        blog.author,
+                                        blog.name,
+                                        blog.url,
+                                        blog.category_id,
+                                        blog.last_date,
+                                        blog.last_user,
+                                        blog.create_date,
+                                        blog.create_user)
         )
         
         
@@ -348,23 +346,25 @@ class database(object):
         """
         post.id = self.cur.execute("""SELECT MAX(id) FROM posts""").fetchone()[0]
         post.id = post.id + 1 if post.id else 1
+        post.content = post.content.replace('"', '\"')
+        post.content = post.content.replace("'", "\'")
+        post.tags = ','.join(post.tags)
         self.cur.execute(
-            f"""INSERT INTO posts
-                                VALUES (
-                                        "{post.id}",
-                                        "{post.title}",
-                                        "{post.author}",
-                                        "{post.date}",
-                                        "{post.tags}",
-                                        "{post.content}",
-                                        "{post.content_html}",
-                                        "{post.url}",
-                                        "{post.blog_id}",
-                                        "{post.last_date}",
-                                        "{post.last_user}",
-                                        "{post.create_date}",
-                                        "{post.create_user}"
-                        )"""
+             """INSERT INTO posts
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                       (post.id,
+                                        post.title,
+                                        post.author,
+                                        post.date,
+                                        post.tags,
+                                        post.content,
+                                        post.content_html,
+                                        post.url,
+                                        post.blog_id,
+                                        post.last_date,
+                                        post.last_user,
+                                        post.create_date,
+                                        post.create_user)
         )
 
     

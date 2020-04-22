@@ -1,5 +1,6 @@
 # Standard
 import sys
+import math
 
 # PyPI
 from bs4 import BeautifulSoup as BS
@@ -56,27 +57,13 @@ def fetch_and_insert_categories(website_name: str) -> tools.insert_results:
     return results
 
 
-
-# results = fetch_and_insert_categories('Patheos Blogs')
-# print(results.inserted, 
-#       results.not_inserted, 
-#       results.exceptions)
-
-
-# with data.database() as db:
-#     result = db.execute("SELECT * FROM categories")
-# pprint(result[:2])
-
-
 def fetch_and_insert_blogs(category_name: str) -> tools.insert_results:
     blog = data.blog()
     results = tools.insert_results()
     with data.database() as db:
         category = db.query_categories(category_name)
-        print(category.url)
-        print(f'{category.name}', end=' ')
+        #print(f'{category.name}', category.url)
         parsed_html = tools.parse_html(category.url)
-        #pprint(parsed_html)
         for item in parsed_html.find_all('div', attrs={"class":"author-info"}):
             for title_html in item.find_all('div', attrs={"class":"title"}):
                 title_html_a = title_html.find('a')
@@ -92,20 +79,6 @@ def fetch_and_insert_blogs(category_name: str) -> tools.insert_results:
                 # <placeholder for logging>
                 results.not_inserted += 1
     return results
-
-
-
-
-# results = fetch_and_insert_blogs('patheos-partner-blogs')
-# print(results.inserted, 
-#       results.not_inserted, 
-#       results.exceptions)
-
-
-# with data.database() as db:
-#     result = db.execute("SELECT * FROM blogs where name = 'ReImagine'")
-#     print(result)
-
 
 
 def number_of_blog_pages(blog_name: str) -> int:
@@ -126,17 +99,12 @@ def number_of_blog_pages(blog_name: str) -> int:
                 search_increment = search_increment_list[search_list_index]
                 url = base_page_url + str(p)
                 url_test = requests.get(url)
-                #print('search_list_index', search_list_index)
                 if url_test.status_code != 404:                                         # While request.get is successful, continue incrementing
                     valid_page = p
                     p += search_increment
                 else:                                                                   # When request.get gets 404 error, move to smaller increment
                     search_list_index += 1
                     p = (p - search_increment) + search_increment_list[search_list_index]
-                #print('search_increment', search_increment)
-                #print('code', url_test.status_code, '=>', p)
-                #print('valid_page', valid_page)
-                #print('')
             except IndexError:
                 search_increment = 0
             db.insert_update_site_pages(valid_page, blog.id)
@@ -153,9 +121,12 @@ def scrape_posts_on_page(blog_page_url: str) -> list:
             post_a = post_url.find('a')
             post_href = post_a['href']
             page_post_urls_l.append(post_href)
+    else:
+        return 404
     return page_post_urls_l
 
 
+# def scrape_post(url: str, blog_id: str, unicode_escape_yes_no='no') -> object:  # post class
 def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post class
     tags = []
     #post = data.post(url=url, blog_id=blog_id)
@@ -167,8 +138,7 @@ def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post cla
             post.author = g_basic.find("span", {"itemprop": "author"}).text
             post.date = g_basic.find("span", {"itemprop": "datePublished dateModified"}).text
         post.content = parsed_html.find("div", {"class": "story-block"}).text
-        #post.content_html = parsed_html.find("div", {"class": "story-block"})
-        post.content = None
+        post.content_html = None
         for items in parsed_html.find_all("ul", {"class": "list-inline related-topics"}):
             for g_tags in items.find_all("li")[0:]:
                 if g_tags.find('a'):
@@ -177,5 +147,14 @@ def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post cla
         post.tags = tags
         if unicode_escape_yes_no == "yes":
             post.title = post.title.encode('unicode_escape')
-            post.content = post.content.encode('unicode_escape')
+            post.content = post.content.encode('utf8')
     return post
+
+
+def find_page_resume_scrape(blog_id):
+    with data.database() as db:
+        number_of_posts = db.execute(f'SELECT COUNT(*) FROM posts WHERE blog_id = {blog_id}')[0][0]
+        print('posts', number_of_posts)
+        number_of_pages = math.floor(number_of_posts / 10)
+        print('divided', number_of_pages)
+    return number_of_pages
