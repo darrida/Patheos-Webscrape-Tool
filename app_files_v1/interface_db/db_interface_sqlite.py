@@ -68,8 +68,8 @@ class blog:
 class post:
     """Intended use is with an insert function into the pposts table."""
     today = date.today()
-    def __init__(self, title=None, author=None, date=None, tags=None, content=None, content_html=None, url=None, 
-                 id=None, blog_id=None, 
+    def __init__(self, url, blog_id, title=None, author=None, date=None, tags=None, content=None, content_html=None,
+                 id=None, 
                  last_date=today, last_user='default',
                  create_date=today, create_user='default'):
         self.id          = id
@@ -357,6 +357,7 @@ class database(object):
                                         "{post.date}",
                                         "{post.tags}",
                                         "{post.content}",
+                                        "{post.content_html}",
                                         "{post.url}",
                                         "{post.blog_id}",
                                         "{post.last_date}",
@@ -444,8 +445,9 @@ class database(object):
                                 date         TIMESTAMP, 
                                 tags         VARCHAR(255), 
                                 content      TEXT, 
+                                content_html TEXT,
                                 url          TEXT NOT NULL,
-                                blog_id     INTEGER NOT NULL,
+                                blog_id      INTEGER NOT NULL,
                                 last_date    TIMESTAMP,
                                 last_user    VARCHAR(100),
                                 create_date  TIMESTAMP,

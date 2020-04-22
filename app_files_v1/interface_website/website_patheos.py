@@ -154,3 +154,28 @@ def scrape_posts_on_page(blog_page_url: str) -> list:
             post_href = post_a['href']
             page_post_urls_l.append(post_href)
     return page_post_urls_l
+
+
+def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post class
+    tags = []
+    #post = data.post(url=url, blog_id=blog_id)
+    response = requests.get(post.url)
+    if response.status_code != 404:
+        parsed_html = BS(response.content, 'html.parser')
+        post.title = parsed_html.find("h1", {"class" : "entry-title"}).text
+        for g_basic in parsed_html.find_all("div", {"class": "main-post"}):
+            post.author = g_basic.find("span", {"itemprop": "author"}).text
+            post.date = g_basic.find("span", {"itemprop": "datePublished dateModified"}).text
+        post.content = parsed_html.find("div", {"class": "story-block"}).text
+        #post.content_html = parsed_html.find("div", {"class": "story-block"})
+        post.content = None
+        for items in parsed_html.find_all("ul", {"class": "list-inline related-topics"}):
+            for g_tags in items.find_all("li")[0:]:
+                if g_tags.find('a'):
+                    tag = g_tags.find('a').text
+                    tags.append(tag)
+        post.tags = tags
+        if unicode_escape_yes_no == "yes":
+            post.title = post.title.encode('unicode_escape')
+            post.content = post.content.encode('unicode_escape')
+    return post
