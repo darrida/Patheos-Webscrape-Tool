@@ -16,9 +16,10 @@ test_database=None
 class website:
     """Intended use is with an insert function into the websites table."""
     today = date.today()
+    last_date = datetime.now()
     def __init__(self, name, url, 
                  id=None, 
-                 last_date=today, last_user='default', 
+                 last_date=last_date, last_user='default', 
                  create_date=today, create_user='default'):
         self.id          = id if id != None else None
         self.name        = name
@@ -32,9 +33,10 @@ class website:
 class category:
     """Intended use is with an insert function into the categories table."""
     today = date.today()
+    last_date = datetime.now()
     def __init__(self, name=None, url=None, website_id=None,
                  id=None, context=None,
-                 last_date=today, last_user='default',
+                 last_date=last_date, last_user='default',
                  create_date=today, create_user='default'):
         self.id          = id if id != None else None
         self.name        = name
@@ -50,9 +52,10 @@ class category:
 class blog:
     """Intended use is with an insert function into the blogs table."""
     today = date.today()
+    last_date = datetime.now()
     def __init__(self, author=None, name=None, url=None, 
                  id=None, category_id=None, 
-                 last_date=today, last_user='default', 
+                 last_date=last_date, last_user='default', 
                  create_date=today, create_user='default'):
         self.id          = id
         self.author      = author
@@ -68,9 +71,10 @@ class blog:
 class post:
     """Intended use is with an insert function into the pposts table."""
     today = date.today()
+    last_date = datetime.now()
     def __init__(self, url, blog_id, title=None, author=None, date=None, tags=None, content=None, content_html=None,
                  id=None, 
-                 last_date=today, last_user='default',
+                 last_date=last_date, last_user='default',
                  create_date=today, create_user='default'):
         self.id          = id
         self.title       = title
@@ -153,11 +157,13 @@ class database(object):
             return None
 
 
-    def query_categories(self, name=None, category_id=None):
-        if name:
-            result = self.cur.execute(f"""SELECT * FROM categories WHERE name = '{name}'""").fetchone()
+    def query_categories(self, name=None, url=None, category_id=None):
         if category_id:
             result = self.cur.execute(f"""SELECT * FROM categories WHERE id = '{category_id}'""").fetchone()
+        elif name:
+            result = self.cur.execute(f"""SELECT * FROM categories WHERE name = '{name}'""").fetchone()
+        elif url:
+            result = self.cur.execute(f"""SELECT * FROM categories WHERE url = '{url}'""").fetchone()
         if result:
             return category(id          = result[0], # id
                             name        = result[1], # name
@@ -173,8 +179,13 @@ class database(object):
             return None
 
     
-    def query_blogs(self, name):
-        result = self.cur.execute(f"""SELECT * FROM blogs WHERE name = '{name}'""").fetchone()
+    def query_blogs(self, name=None, url=None, blog_id=None) -> object:   # blog object
+        if blog_id:
+            result = self.cur.execute(f"""SELECT * FROM blogs WHERE id = '{blog_id}'""").fetchone()
+        elif name:
+            result = self.cur.execute(f"""SELECT * FROM blogs WHERE name = '{name}'""").fetchone()
+        elif name:
+            result = self.cur.execute(f"""SELECT * FROM blogs WHERE url = '{url}'""").fetchone()
         if result:
             return blog(id          = result[0], # id
                         author      = result[1], # name
@@ -323,7 +334,7 @@ class database(object):
         blog.id = blog.id + 1 if blog.id else 1
         blog.name = blog.name.replace('"', '')
         return self.cur.execute(
-            f"""INSERT INTO blogs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, )""",
+            f"""INSERT INTO blogs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                                        (blog.id,
                                         blog.author,
                                         blog.name,
@@ -334,7 +345,26 @@ class database(object):
                                         blog.create_date,
                                         blog.create_user)
         )
-        
+
+
+    def update_date_blog(self, blog):
+        """Inserts a category record. Designed for use with the category class.
+
+        Arguments:
+            category (category class): class or dictionary containing the following values:
+                -
+
+        """
+        # blog.id = self.cur.execute("""SELECT MAX(id) FROM blogs""").fetchone()[0]
+        # blog.id = blog.id + 1 if blog.id else 1
+        # blog.name = blog.name.replace('"', '')
+        last_date = datetime.now()
+        return self.cur.execute(
+            f"""UPDATE blogs
+                SET last_date = '{last_date}'
+                WHERE id = {blog.id}"""
+        )
+
         
     def insert_post(self, post):
         """Inserts a category record. Designed for use with the category class.

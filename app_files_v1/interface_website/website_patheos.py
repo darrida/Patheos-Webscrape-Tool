@@ -37,11 +37,11 @@ def insert_website(website_name: str, website_url: str) -> data.website:
 # pprint(result)
 
 
-def fetch_and_insert_categories(website_name: str) -> tools.insert_results:
+def fetch_and_insert_categories(website_name: str, website_id: int) -> tools.insert_results:
     category = data.category()
     results = tools.insert_results()
     with data.database() as db:
-        website = db.query_websites(website_name)
+        website = db.query_websites(name=website_name, website_id=website_id)
         print(f'Pulling categories for {website.name}')
         parsed_html = tools.parse_html(website.url)
         for item in parsed_html.find_all('div', attrs={"class":"related-content clearfix related-content-sm decorated channel-list"}):
@@ -81,9 +81,9 @@ def fetch_and_insert_blogs(category_name: str) -> tools.insert_results:
     return results
 
 
-def number_of_blog_pages(blog_name: str) -> int:
+def number_of_blog_pages(name=None, blog_id=None) -> int:
     with data.database() as db:
-        blog = db.query_blogs(blog_name)
+        blog = db.query_blogs(name=name, blog_id=blog_id)
         base_page_url = blog.url + '/page/'
         try:
             result = db.execute(f"SELECT number FROM site_pages WHERE site_id = {blog.id}")[0][0]
@@ -92,7 +92,7 @@ def number_of_blog_pages(blog_name: str) -> int:
             valid_page = 1
         original_number = valid_page
         p = valid_page
-        search_increment_list = [100, 10, 1, 0]
+        search_increment_list = [1000, 100, 10, 5, 1, 0]
         search_list_index = 0
         while search_increment_list[search_list_index] != 0:                            # Continue processing until the increment number = 0
             try:
@@ -108,8 +108,8 @@ def number_of_blog_pages(blog_name: str) -> int:
             except IndexError:
                 search_increment = 0
             db.insert_update_site_pages(valid_page, blog.id)
-            sys.stdout.write('\r' + str(valid_page))
-    return valid_page - original_number
+            #sys.stdout.write('\r' 'PAGES: ' + str(valid_page))
+    return valid_page #- original_number
 
 
 def scrape_posts_on_page(blog_page_url: str) -> list:
@@ -154,7 +154,5 @@ def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post cla
 def find_page_resume_scrape(blog_id):
     with data.database() as db:
         number_of_posts = db.execute(f'SELECT COUNT(*) FROM posts WHERE blog_id = {blog_id}')[0][0]
-        print('posts', number_of_posts)
         number_of_pages = math.floor(number_of_posts / 10)
-        print('divided', number_of_pages)
     return number_of_pages
