@@ -136,6 +136,21 @@ class database(object):
         self.__db_connection.close()
     
 
+
+    def query_table_ids_all(self, table: str, where_column=None, table_id=None, last_date_ascending=False) -> list:
+        id_list = []
+        if table_id == None:
+            result = self.cur.execute(f"""SELECT id FROM {table} 
+                                          ORDER BY last_date {'ASC' if last_date_ascending==False else 'DESC'}""").fetchall()
+        else:
+            result = self.cur.execute(f"""SELECT id FROM {table} 
+                                          WHERE {where_column} = {table_id} 
+                                          ORDER BY last_date {'ASC' if last_date_ascending==False else 'DESC'}""").fetchall()
+        for i in result:
+            id_list.append(i[0])
+        return id_list
+
+
     def query_websites(self, name=None, url=None, website_id=None):
         if name:
             result = self.cur.execute(f"""SELECT * FROM websites WHERE name = '{name}'""").fetchone()
