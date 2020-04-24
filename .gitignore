@@ -143,7 +143,7 @@ media
 static
 
 # VSCode
-.vscode/*
+.vscode
 settings.json
 venv
 app_files_v1/poc-pull-cats.blogs.#ofposts.ipynb

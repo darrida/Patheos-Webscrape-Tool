@@ -1,7 +1,6 @@
 # PyPI
 from bs4 import BeautifulSoup as BS
 import requests
-from tqdm import tqdm
 
 # LOCAL
 from interface_db import db_interface_sqlite as data
