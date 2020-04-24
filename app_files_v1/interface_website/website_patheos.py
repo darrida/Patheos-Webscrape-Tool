@@ -1,6 +1,8 @@
 # Standard
 import sys
 import math
+import time
+import datetime
 
 # PyPI
 from bs4 import BeautifulSoup as BS
@@ -10,6 +12,78 @@ from tqdm import tqdm
 # LOCAL
 from interface_db import db_interface_sqlite as data
 from interface_website import website_tools as tools
+
+
+# Global Variables
+results = tools.insert_results()
+
+
+def scrape_patheos(website_id):    
+    #print(website_id)
+    with data.database() as db:
+        category_ids = db.query_table_ids_all('categories', 'website_id', website_id)#, last_date_ascending=True)
+        print(category_ids)
+        for i in category_ids:
+            with data.database() as db:
+                category = db.query_categories(category_id=i)
+                print(category.name)
+                blog_ids = db.query_table_ids_all('blogs', 'category_id', category.id)#, last_date_ascending=True)
+                for i in blog_ids:
+                    scrape_blog_initialize(i)
+            with data.database() as db:
+                db.update_date_category(category)
+
+
+def scrape_blog_initialize(blog_id):
+    with data.database() as db:
+        blog = db.query_blogs(blog_id=blog_id)
+        total_blogs = db.execute(f"""SELECT COUNT(*) FROM blogs WHERE category_id = {blog.category_id}""")[0][0]
+    total_pages = number_of_blog_pages(blog_id=blog.id)
+    resume_page = find_page_resume_scrape(blog.id)
+    
+    page_number = resume_page
+    total = 0
+    continue_on = True
+    while continue_on == True:
+        base_url = blog.url + '/page/' + str(page_number)
+        #print(base_url)
+        results_l = scrape_posts_on_page(base_url)
+        if results_l != 404:
+            for i in results_l:
+                try:
+                    post = data.post(i, blog.id)
+#                     post = scrape_post(post, 'no')
+                    if tools.check_url_new('posts', i) == True:
+                        post = scrape_post(post, 'no')
+                        if post.title == None:
+                            print('no title')
+                        with data.database() as db:
+                            db.insert_post(post)
+                            db.commit()
+                            results.inserted += 1
+                    else:
+                        # <placeholder for logging>
+                        results.not_inserted += 1
+                    total += 1
+                    sys.stdout.write('\r' + 'BLOG: (' + str(blog.id) + '/' + str(total_blogs) + ') '  + blog.name 
+                                          + ' | PAGE: ' + str(page_number) + '/' + str(total_pages) 
+                                          + ' | TOTAL PROCESSED: ' + str(total) 
+                                          + ' | INSERTED: ' + str(results.inserted)
+                                          + ' | NOT INSERTED: ' + str(results.not_inserted))
+                except AttributeError:
+                    with data.database() as db:
+                        url_error = data.url_error(i, 'post', blog_id)
+                        db.insert_error_url(url_error)
+        else:
+            continue_on = False
+        page_number += 1
+        sys.stdout.write('\r' + 'BLOG: (' + str(blog.id) + '/' + str(total_blogs) + ') '  + blog.name 
+                              + ' | PAGE: ' + str(page_number) + '/' + str(total_pages) 
+                              + ' | TOTAL PROCESSED: ' + str(total) 
+                              + ' | INSERTED: ' + str(results.inserted)
+                              + ' | NOT INSERTED: ' + str(results.not_inserted))
+    with data.database() as db:
+        db.update_date_blog(blog)
 
 
 def insert_website(website_name: str, website_url: str) -> data.website:
@@ -37,11 +111,11 @@ def insert_website(website_name: str, website_url: str) -> data.website:
 # pprint(result)
 
 
-def fetch_and_insert_categories(website_name: str, website_id: int) -> tools.insert_results:
+def fetch_and_insert_categories(website_id: int) -> tools.insert_results:
     category = data.category()
     results = tools.insert_results()
     with data.database() as db:
-        website = db.query_websites(name=website_name, website_id=website_id)
+        website = db.query_websites(website_id=website_id)
         print(f'Pulling categories for {website.name}')
         parsed_html = tools.parse_html(website.url)
         for item in parsed_html.find_all('div', attrs={"class":"related-content clearfix related-content-sm decorated channel-list"}):

@@ -12,6 +12,24 @@ from datetime import date
 # Variables to make pylint happy
 test_database=None
 
+class url_error:
+    """Intended use is with an insert function into the url_error_list table."""
+    today = date.today()
+    last_date = datetime.now()
+    def __init__(self, url, url_type, parent_id, resolved=False,
+                 id=None, 
+                 last_date=last_date, last_user='default', 
+                 create_date=today, create_user='default'):
+        self.id          = id if id != None else None
+        self.url         = url
+        self.url_type    = url_type
+        self.parent_id   = parent_id
+        self.resolved    = resolved
+        self.last_date   = last_date
+        self.last_user   = last_user
+        self.create_date = create_date
+        self.create_user = create_user
+
 
 class website:
     """Intended use is with an insert function into the websites table."""
@@ -146,6 +164,10 @@ class database(object):
             result = self.cur.execute(f"""SELECT id FROM {table} 
                                           WHERE {where_column} = {table_id} 
                                           ORDER BY last_date {'ASC' if last_date_ascending==False else 'DESC'}""").fetchall()
+        # print(f"""SELECT id FROM {table} 
+        #                                   WHERE {where_column} = {table_id} 
+        #                                   ORDER BY last_date {'ASC' if last_date_ascending==False else 'DESC'}""")
+        
         for i in result:
             id_list.append(i[0])
         return id_list
@@ -370,14 +392,27 @@ class database(object):
                 -
 
         """
-        # blog.id = self.cur.execute("""SELECT MAX(id) FROM blogs""").fetchone()[0]
-        # blog.id = blog.id + 1 if blog.id else 1
-        # blog.name = blog.name.replace('"', '')
         last_date = datetime.now()
         return self.cur.execute(
             f"""UPDATE blogs
                 SET last_date = '{last_date}'
                 WHERE id = {blog.id}"""
+        )
+
+    
+    def update_date_category(self, category):
+        """Inserts a category record. Designed for use with the category class.
+
+        Arguments:
+            category (category class): class or dictionary containing the following values:
+                -
+
+        """
+        last_date = datetime.now()
+        return self.cur.execute(
+            f"""UPDATE categories
+                SET last_date = '{last_date}'
+                WHERE id = {category.id}"""
         )
 
         
@@ -412,6 +447,31 @@ class database(object):
                                         post.create_user)
         )
 
+
+    def insert_error_url(self, url_error: object):
+        """Inserts a category record. Designed for use with the category class.
+
+        Arguments:
+            category (category class): class or dictionary containing the following values:
+                -
+
+        """
+        url_error.id = self.cur.execute("""SELECT MAX(id) FROM url_error_list""").fetchone()[0]
+        url_error.id = url_error.id + 1 if url_error.id else 1
+        self.cur.execute(
+            """INSERT INTO url_error_list
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                        (url_error.id,
+                                        url_error.url,
+                                        url_error.url_type,
+                                        url_error.parent_id,
+                                        url_error.resolved,
+                                        url_error.last_date,
+                                        url_error.last_user,
+                                        url_error.create_date,
+                                        url_error.create_user)
+        )
+
     
     def create_tables(self):
         """This function confirms the existence of or creates the path, database, and tables.
@@ -435,6 +495,20 @@ class database(object):
                                 id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 number       INTEGER NOT NULL,
                                 site_id      INTEGER NOT NULL UNIQUE,
+                                last_date    TIMESTAMP,
+                                last_user    VARCHAR(100),
+                                create_date  TIMESTAMP,
+                                create_user  VARCHAR(100)
+                        )"""
+        )
+        self.cur.execute(
+            """CREATE TABLE IF NOT EXISTS 
+                            url_error_list (
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+                                url          TEXT NOT NULL,
+                                url_type     TEXT NOT NULL,
+                                parent_id    INTEGER NOT NULL,
+                                resolved     TEXT NOT NULL,
                                 last_date    TIMESTAMP,
                                 last_user    VARCHAR(100),
                                 create_date  TIMESTAMP,
