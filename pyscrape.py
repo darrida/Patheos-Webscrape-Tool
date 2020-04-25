@@ -21,7 +21,8 @@ def cli():
 
 @cli.command('start', help='Begins or resumes scraping of configured websites.')
 @click.option('-u', '--update', 'update', is_flag=True)
-def pyscrape_start(update):
+@click.option('-s', '--stop', 'stop', is_flag=True, help='Process stops after category and blog update.')
+def pyscrape_start(update, stop):
     """Main function that initializes the webscrapers and begins
     """
     #try:
@@ -42,7 +43,10 @@ def pyscrape_start(update):
                             print(f'Inserted: {results.inserted} '
                                 + f'| Not Inserted: {results.not_inserted} '
                                 + f' | Errors: {results.exceptions}')
-                patheos.scrape_patheos(website.id)
+                if stop:
+                    exit()
+                else:
+                    patheos.scrape_patheos(website.id)
             else:
                 pass
     #except Exception:
@@ -60,11 +64,11 @@ def initialize():
 @click.argument('url', required=False)
 def websites(name, url):
     with data.database() as db:
-        if name or url:
+        if (name and url == None) or (url and name == None):
             click.echo('Both NAME and URL are needed to add a site.\n')
             exit()
         if name and url:
-            patheos.insert_website(new, address)
+            patheos.insert_website(name, url)
         website_ids = db.query_table_ids_all('websites')
         for i in website_ids:
             website = db.query_websites(website_id=i)

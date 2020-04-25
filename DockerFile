@@ -7,15 +7,14 @@ WORKDIR /home/app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 COPY . /home/app/
-RUN cd app
 RUN python pyscrape.py init
 RUN python pyscrape.py websites "Patheos Blogs" "https://www.patheos.com/blogs"
-RUN cd ..
+RUN python pyscrape.py start -u -s
 #RUN pip install -e .
 #COPY flasky.py config.py boot.sh /home/app/
 #ENV FLASK_ENV development
 #CMD ['/home/app/tools/ubuntu-config.sh']
 # runtime configuration
 # EXPOSE 5000
-CMD ["./app/pyscrape.py start"]
+CMD ["python", "pyscrape.py", "start"]
 #"--host", "0.0.0.0"]
