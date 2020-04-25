@@ -6,9 +6,9 @@ import click
 import requests
 
 # LOCAL
-from interface_db import db_interface_sqlite as data
-from interface_website import website_tools as tools
-from interface_website import website_patheos as patheos
+from app.interface_db import db_interface_sqlite as data
+from app.interface_website import website_tools as tools
+from app.interface_website import website_patheos as patheos
 
 
 @click.group()
@@ -27,7 +27,7 @@ def pyscrape_start(update):
     #try:
     with data.database() as db:
         website_ids = db.query_table_ids_all('websites')#, last_date_ascending=True)
-        print(website_ids)
+        #print(website_ids)
         for i in website_ids:
             website = db.query_websites(website_id=i)
             #print(website)
@@ -35,23 +35,10 @@ def pyscrape_start(update):
                 print(website.name)
                 if update:
                     patheos.fetch_and_insert_categories(website_id=website.id)
-                    #category_ids = db.query_table_ids_all('categories', 'website_id', website.id)
-                    #print(category_ids)
-                    #for i in category_ids:
-                    #    category = db.query_categories(category_id=i)
-                    #    patheos.fetch_and_insert_blogs(category.name)
-
-
-
-
-                    #results = patheos.fetch_and_insert_categories(website=website.id)
-                    with data.database() as db:
-                        result = db.execute("SELECT name FROM categories")
-                        for i in result:
-                            results = patheos.fetch_and_insert_blogs(i[0])
-                            print(f'Inserted: {results.inserted} '
-                                + f'| Not Inserted: {results.not_inserted} '
-                                + f' | Errors: {results.exceptions}')
+                    category_ids = db.query_table_ids_all('categories', 'website_id', website.id)
+                    for i in category_ids:
+                        category = db.query_categories(category_id=i)
+                        patheos.fetch_and_insert_blogs(category.name)
                 patheos.scrape_patheos(website.id)
             else:
                 pass
@@ -66,15 +53,8 @@ def initialize():
 
 
 @cli.command('websites', help='List and manage top level websites.')
-#@click.option('-i', '--insert', 'insert', is_flag=True)
-@click.argument('new', required=False)
-@click.argument('address', required=False)
-#@click.option('-n', '--new', 'new')
-#@click.option('-a', '--address', 'address')
-def websites(new, address):
+def websites():
     with data.database() as db:
-        if new:
-            patheos.insert_website(new, address)
         website_ids = db.query_table_ids_all('websites')
         for i in website_ids:
             website = db.query_websites(website_id=i)
