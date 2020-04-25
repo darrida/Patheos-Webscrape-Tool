@@ -62,16 +62,16 @@ def websites():
             click.echo('WEBSITE URL:'+ website.url + '\n')
 
 
-@cli.command('hold')
-def placeholder1():
-    with data.database() as db:
-        db.create_tables()
-        db.insert_update_site_pages(0, 149)
-        result = db.execute(f"SELECT number FROM site_pages WHERE site_id = 47")
-        #print(result[0][0])
-        for i in result:
-            results = patheos.fetch_and_insert_blogs(i[0])
-            print(f'Inserted: {results.inserted} | Not Inserted: {results.not_inserted} | Errors: {results.exceptions}')
+# @cli.command('hold')
+# def placeholder1():
+#     with data.database() as db:
+#         db.create_tables()
+#         db.insert_update_site_pages(0, 149)
+#         result = db.execute(f"SELECT number FROM site_pages WHERE site_id = 47")
+#         #print(result[0][0])
+#         for i in result:
+#             results = patheos.fetch_and_insert_blogs(i[0])
+#             print(f'Inserted: {results.inserted} | Not Inserted: {results.not_inserted} | Errors: {results.exceptions}')
 
 
 # def placeholder2():
