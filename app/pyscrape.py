@@ -35,16 +35,6 @@ def pyscrape_start(update):
                 print(website.name)
                 if update:
                     patheos.fetch_and_insert_categories(website_id=website.id)
-                    #category_ids = db.query_table_ids_all('categories', 'website_id', website.id)
-                    #print(category_ids)
-                    #for i in category_ids:
-                    #    category = db.query_categories(category_id=i)
-                    #    patheos.fetch_and_insert_blogs(category.name)
-
-
-
-
-                    #results = patheos.fetch_and_insert_categories(website=website.id)
                     with data.database() as db:
                         result = db.execute("SELECT name FROM categories")
                         for i in result:
@@ -66,14 +56,14 @@ def initialize():
 
 
 @cli.command('websites', help='List and manage top level websites.')
-#@click.option('-i', '--insert', 'insert', is_flag=True)
-@click.argument('new', required=False)
-@click.argument('address', required=False)
-#@click.option('-n', '--new', 'new')
-#@click.option('-a', '--address', 'address')
-def websites(new, address):
+@click.argument('name', required=False)
+@click.argument('url', required=False)
+def websites(name, url):
     with data.database() as db:
-        if new:
+        if name or url:
+            click.echo('Both NAME and URL are needed to add a site.\n')
+            exit()
+        if name and url:
             patheos.insert_website(new, address)
         website_ids = db.query_table_ids_all('websites')
         for i in website_ids:
