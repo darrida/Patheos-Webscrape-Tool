@@ -12,32 +12,31 @@ import requests
 from interface_db import db_interface_postgres as data
 from interface_db import table_classes as table
 from interface_website import website_tools as tools
+from interface_db import orm_peewee_classes as db
 
 
 # Global Variables
 results = tools.insert_results()
 
 
-def scrape_patheos(website_id):    
-    #print(website_id)
-    with data.database() as db:
-        category_ids = db.query_table_ids_all('categories', 'website_id', website_id)#, last_date_ascending=True)
-        print(category_ids)
-        for i in category_ids:
-            with data.database() as db:
-                category = db.query_categories(category_id=i)
-                print(category.name)
-                blog_ids = db.query_table_ids_all('blogs', 'category_id', category.id)#, last_date_ascending=True)
-                for i in blog_ids:
-                    scrape_blog_initialize(i)
-            with data.database() as db:
-                db.update_date_category(category)
+def scrape_patheos(website: db.website):    
+    db.db.connect()
+    categories = db.category.select().join(website).where(website_id=website.id)
+    print(categories)
+    for category in categories:
+        print(category.name)
+        blogs = db.blog.select().join(category).where(category_id=category.id)
+        for blog in blogs:
+            scrape_blog_initialize(blog.id)
+        nrows = (category
+                 .update(last_date=datetime.datetime.utcnow(),
+                         last_user='user')
+                 .where(id=category.id))
 
 
-def scrape_blog_initialize(blog_id):
-    with data.database() as db:
-        blog = db.query_blogs(blog_id=blog_id)
-        total_blogs = db.execute(f"""SELECT COUNT(*) FROM blogs WHERE category_id = {blog.category_id}""")[0][0]
+def scrape_blog_initialize(blog):
+    #blog = db.blog.select().join(blog).where(blog_id=blog.id)
+    total_blogs = blog.select().count()
     total_pages = number_of_blog_pages(blog_id=blog.id)
     resume_page = find_page_resume_scrape(blog.id)
     

@@ -6,7 +6,7 @@ import click
 import requests
 
 # LOCAL
-from interface_db import db_interface_sqlite as data
+from interface_db import db_interface_postgres as data
 from interface_website import website_tools as tools
 from interface_website import website_patheos as patheos
 

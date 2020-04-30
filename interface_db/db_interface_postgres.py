@@ -6,6 +6,7 @@ from datetime import datetime
 from datetime import date
 
 # PyPI
+import psycopg2
 
 # LOCAL
 from interface_db import table_classes as table
@@ -139,25 +140,15 @@ class database(object):
         #     print(os.path.exists(prod_database / 'webscraper.db'))
         #     __DB_LOCATION = prod_database / 'webscraper.db'
         #     print(__DB_LOCATION)
-
         else:
-            __DB_LOCATION = (
-                Path.home() 
-                / "py_apps" 
-                / "_appdata" 
-                / "webscraper"
-                / "webscraper.db"
+            self.__db_connection = psycopg2.connect(
+                user='postgres',
+                password='postgrest',
+                host='192.168.86.108',
+                port='32834',
+                #database='postgres_db'
             )
-            if os.path.exists(__DB_LOCATION):
-                self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
-                self.cur = self.__db_connection.cursor()
-            else:
-                Path(
-                    Path.home() / "py_apps" / "_appdata" / "webscraper"
-                ).mkdir(parents=True, exist_ok=True)
-                self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
-                self.cur = self.__db_connection.cursor()
-
+            self.cur = self.__db_connection.cursor()
     def __del__(self):
         self.__db_connection.close()
 
@@ -196,7 +187,8 @@ class database(object):
         if name:
             result = self.cur.execute(f"""SELECT * FROM websites WHERE name = '{name}'""").fetchone()
         elif url:
-            result = self.cur.execute(f"""SELECT * FROM websites WHERE url = '{url}'""").fetchone()
+            result = self.cur.execute(f"""SELECT * FROM websites WHERE url = '{url}'""")
+            print(result)
         elif website_id:
             result = self.cur.execute(f"""SELECT * FROM websites WHERE id = '{website_id}'""").fetchone()
         else:

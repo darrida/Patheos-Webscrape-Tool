@@ -12,21 +12,11 @@ try:
     cursor = connection.cursor()
     print ( connection.get_dsn_parameters(),"\n")
 
-    results = cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS 
-                            site_pages (
-                                id           BIGSERIAL PRIMARY KEY, 
-                                number       INTEGER NOT NULL,
-                                site_id      INTEGER NOT NULL UNIQUE,
-                                last_date    TIMESTAMP,
-                                last_user    VARCHAR(100),
-                                create_date  TIMESTAMP,
-                                create_user  VARCHAR(100)
-                        )"""
-    )
 
-    results = cursor.execute("""SELECT * FROM site_pages""")
     print(results)
+    #results = cursor.execute("""SELECT * FROM site_pages""")
+
+    print(type(results))
 
     # Print PostgreSQL version
     cursor.execute("SELECT version();")
