@@ -8,105 +8,109 @@ from datetime import date
 # PyPI
 
 # LOCAL
+from interface_db import table_classes as table
 
 # Variables to make pylint happy
 test_database=None
-
-class url_error:
-    """Intended use is with an insert function into the url_error_list table."""
-    today = date.today()
-    last_date = datetime.now()
-    def __init__(self, url, url_type, parent_id, resolved=False,
-                 id=None, 
-                 last_date=last_date, last_user='default', 
-                 create_date=today, create_user='default'):
-        self.id          = id if id != None else None
-        self.url         = url
-        self.url_type    = url_type
-        self.parent_id   = parent_id
-        self.resolved    = resolved
-        self.last_date   = last_date
-        self.last_user   = last_user
-        self.create_date = create_date
-        self.create_user = create_user
+# if os.environ['WEBSCRAPE_DB']:
+#     prod_database=Path(os.environ['WEBSCRAPE_DB'])
 
 
-class website:
-    """Intended use is with an insert function into the websites table."""
-    today = date.today()
-    last_date = datetime.now()
-    def __init__(self, name, url, 
-                 id=None, 
-                 last_date=last_date, last_user='default', 
-                 create_date=today, create_user='default'):
-        self.id          = id if id != None else None
-        self.name        = name
-        self.url         = url
-        self.last_date   = last_date
-        self.last_user   = last_user
-        self.create_date = create_date
-        self.create_user = create_user
+# class url_error:
+#     """Intended use is with an insert function into the url_error_list table."""
+#     today = date.today()
+#     last_date = datetime.now()
+#     def __init__(self, url, url_type, parent_id, resolved=False,
+#                  id=None, 
+#                  last_date=last_date, last_user='default', 
+#                  create_date=today, create_user='default'):
+#         self.id          = id if id != None else None
+#         self.url         = url
+#         self.url_type    = url_type
+#         self.parent_id   = parent_id
+#         self.resolved    = resolved
+#         self.last_date   = last_date
+#         self.last_user   = last_user
+#         self.create_date = create_date
+#         self.create_user = create_user
 
 
-class category:
-    """Intended use is with an insert function into the categories table."""
-    today = date.today()
-    last_date = datetime.now()
-    def __init__(self, name=None, url=None, website_id=None,
-                 id=None, context=None,
-                 last_date=last_date, last_user='default',
-                 create_date=today, create_user='default'):
-        self.id          = id if id != None else None
-        self.name        = name
-        self.context     = context
-        self.url         = url
-        self.website_id  = website_id
-        self.last_date   = last_date
-        self.last_user   = last_user
-        self.create_date = create_date
-        self.create_user = create_user
+# class website:
+#     """Intended use is with an insert function into the websites table."""
+#     today = date.today()
+#     last_date = datetime.now()
+#     def __init__(self, name, url, 
+#                  id=None, 
+#                  last_date=last_date, last_user='default', 
+#                  create_date=today, create_user='default'):
+#         self.id          = id if id != None else None
+#         self.name        = name
+#         self.url         = url
+#         self.last_date   = last_date
+#         self.last_user   = last_user
+#         self.create_date = create_date
+#         self.create_user = create_user
+
+
+# class category:
+#     """Intended use is with an insert function into the categories table."""
+#     today = date.today()
+#     last_date = datetime.now()
+#     def __init__(self, name=None, url=None, website_id=None,
+#                  id=None, context=None,
+#                  last_date=last_date, last_user='default',
+#                  create_date=today, create_user='default'):
+#         self.id          = id if id != None else None
+#         self.name        = name
+#         self.context     = context
+#         self.url         = url
+#         self.website_id  = website_id
+#         self.last_date   = last_date
+#         self.last_user   = last_user
+#         self.create_date = create_date
+#         self.create_user = create_user
     
     
-class blog:
-    """Intended use is with an insert function into the blogs table."""
-    today = date.today()
-    last_date = datetime.now()
-    def __init__(self, author=None, name=None, url=None, 
-                 id=None, category_id=None, 
-                 last_date=last_date, last_user='default', 
-                 create_date=today, create_user='default'):
-        self.id          = id
-        self.author      = author
-        self.name        = name
-        self.url         = url
-        self.category_id = category_id
-        self.last_date   = last_date
-        self.last_user   = last_user
-        self.create_date = create_date
-        self.create_user = create_user
+# class blog:
+#     """Intended use is with an insert function into the blogs table."""
+#     today = date.today()
+#     last_date = datetime.now()
+#     def __init__(self, author=None, name=None, url=None, 
+#                  id=None, category_id=None, 
+#                  last_date=last_date, last_user='default', 
+#                  create_date=today, create_user='default'):
+#         self.id          = id
+#         self.author      = author
+#         self.name        = name
+#         self.url         = url
+#         self.category_id = category_id
+#         self.last_date   = last_date
+#         self.last_user   = last_user
+#         self.create_date = create_date
+#         self.create_user = create_user
 
 
-class post:
-    """Intended use is with an insert function into the pposts table."""
-    today = date.today()
-    last_date = datetime.now()
-    def __init__(self, url, blog_id, title=None, author=None, date=None, tags=None, content=None, content_html=None,
-                 id=None, 
-                 last_date=last_date, last_user='default',
-                 create_date=today, create_user='default'):
-        self.id          = id
-        self.title       = title
-        self.author      = author
-        self.date        = date
-        self.tags        = tags
-        self.content     = content
-        self.content_html= content_html
-        self.url         = url
-        self.blog_id     = blog_id
-        self.last_date   = last_date
-        self.last_user   = last_user
-        self.create_date = create_date
-        self.create_user = create_user
+# class post:
+#     """Intended use is with an insert function into the pposts table."""
+#     today = date.today()
+#     last_date = datetime.now()
+#     def __init__(self, url, blog_id, title=None, author=None, date=None, tags=None, content=None, content_html=None,
+#                  id=None, 
+#                  last_date=last_date, last_user='default',
+#                  create_date=today, create_user='default'):
+#         self.id          = id
+#         self.title       = title
+#         self.author      = author
+#         self.date        = date
+#         self.tags        = tags
+#         self.content     = content
+#         self.content_html= content_html
+#         self.url         = url
+#         self.blog_id     = blog_id
+#         self.last_date   = last_date
+#         self.last_user   = last_user
+#         self.create_date = create_date
+#         self.create_user = create_user
 
 
 class database(object):
@@ -121,6 +125,12 @@ class database(object):
         if test_database:
             self.__db_connection = test_database
             self.cur = self.__db_connection.cursor()
+        # elif os.path.exists(Path(os.environ['WEBSCRAPE_DB']) / 'webscraper.db'): #os.environ['WEBSCRAPE_DB']:
+        #     print(os.path.exists(Path(os.environ['WEBSCRAPE_DB']) / 'webscraper.db'))
+        #     print(os.path.exists(prod_database / 'webscraper.db'))
+        #     __DB_LOCATION = prod_database / 'webscraper.db'
+        #     print(__DB_LOCATION)
+
         else:
             __DB_LOCATION = (
                 Path.home() 
@@ -183,7 +193,7 @@ class database(object):
         else:
             return 'query_websites() requires name or url'
         if result:
-            return website(id          = result[0], # id
+            return table.website(id          = result[0], # id
                            name        = result[1], # name
                            url         = result[2], # url
                            last_date   = result[3], # last_date
@@ -202,7 +212,7 @@ class database(object):
         elif url:
             result = self.cur.execute(f"""SELECT * FROM categories WHERE url = '{url}'""").fetchone()
         if result:
-            return category(id          = result[0], # id
+            return table.category(id          = result[0], # id
                             name        = result[1], # name
                             context     = result[2], # context
                             url         = result[3], # url
@@ -224,7 +234,7 @@ class database(object):
         elif name:
             result = self.cur.execute(f"""SELECT * FROM blogs WHERE url = '{url}'""").fetchone()
         if result:
-            return blog(id          = result[0], # id
+            return table.blog(id          = result[0], # id
                         author      = result[1], # name
                         name        = result[2], # context
                         url         = result[3], # url

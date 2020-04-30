@@ -10,6 +10,7 @@ import requests
 
 # LOCAL
 from interface_db import db_interface_sqlite as data
+from interface_db import table_classes as table
 from interface_website import website_tools as tools
 
 
@@ -50,7 +51,7 @@ def scrape_blog_initialize(blog_id):
         if results_l != 404:
             for i in results_l:
                 try:
-                    post = data.post(i, blog.id)
+                    post = table.post(i, blog.id)
 #                     post = scrape_post(post, 'no')
                     if tools.check_url_new('posts', i) == True:
                         post = scrape_post(post, 'no')
@@ -71,7 +72,7 @@ def scrape_blog_initialize(blog_id):
                                           + ' | NOT INSERTED: ' + str(results.not_inserted))
                 except AttributeError:
                     with data.database() as db:
-                        url_error = data.url_error(i, 'post', blog_id)
+                        url_error = table.url_error(i, 'post', blog_id)
                         db.insert_error_url(url_error)
         else:
             continue_on = False
@@ -86,7 +87,7 @@ def scrape_blog_initialize(blog_id):
 
 
 def insert_website(website_name: str, website_url: str) -> data.website:
-    website = data.website(name = website_name, url = website_url)
+    website = table.website(name = website_name, url = website_url)
     #results = tools.insert_results()
     with data.database() as db:
         print(f'Inserting {website_name} - {website_url}')
@@ -111,7 +112,7 @@ def insert_website(website_name: str, website_url: str) -> data.website:
 
 
 def fetch_and_insert_categories(website_id: int) -> tools.insert_results:
-    category = data.category()
+    category = table.category()
     results = tools.insert_results()
     with data.database() as db:
         website = db.query_websites(website_id=website_id)
@@ -131,7 +132,7 @@ def fetch_and_insert_categories(website_id: int) -> tools.insert_results:
 
 
 def fetch_and_insert_blogs(category_name: str) -> tools.insert_results:
-    blog = data.blog()
+    blog = table.blog()
     results = tools.insert_results()
     with data.database() as db:
         category = db.query_categories(category_name)
@@ -202,7 +203,7 @@ def scrape_posts_on_page(blog_page_url: str) -> list:
 # def scrape_post(url: str, blog_id: str, unicode_escape_yes_no='no') -> object:  # post class
 def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post class
     tags = []
-    #post = data.post(url=url, blog_id=blog_id)
+    #post = table.post(url=url, blog_id=blog_id)
     response = requests.get(post.url)
     if response.status_code != 404:
         parsed_html = BS(response.content, 'html.parser')

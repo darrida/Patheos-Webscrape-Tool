@@ -1,15 +1,15 @@
 
 FROM python:3.8.1-slim-buster
 #ENV FLASK_APP flasky.py
-#ENV FLASK_CONFIG docker
+ENV WEBSCRAPE_DB "/home/app"
 ENV PYTHONPATH "${PYTHONPATH}:/home/app"
 WORKDIR /home/app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 COPY . /home/app/
-RUN python pyscrape.py init
-RUN python pyscrape.py websites "Patheos Blogs" "https://www.patheos.com/blogs"
-RUN python pyscrape.py start -u -s
+#RUN python pyscrape.py init
+#RUN python pyscrape.py websites "Patheos Blogs" "https://www.patheos.com/blogs"
+#RUN python pyscrape.py start -u -s
 #RUN pip install -e .
 #COPY flasky.py config.py boot.sh /home/app/
 #ENV FLASK_ENV development
