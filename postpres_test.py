@@ -11,7 +11,7 @@ try:
 
     cursor = connection.cursor()
     print ( connection.get_dsn_parameters(),"\n")
-
+    results = ''
 
     print(results)
     #results = cursor.execute("""SELECT * FROM site_pages""")

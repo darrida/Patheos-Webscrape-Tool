@@ -4,11 +4,12 @@ from pprint import pprint
 # PyPI
 import click
 import requests
+import peewee
 
 # LOCAL
-from interface_db import db_interface_postgres as data
+#from interface_db import db_interface_postgres as data
 from interface_website import website_tools as tools
-from interface_website import website_patheos as patheos
+from interface_website import website_patheos_psql as patheos
 from interface_db import orm_peewee_classes as pw
 
 
@@ -27,54 +28,57 @@ def pyscrape_start(update, stop):
     """Main function that initializes the webscrapers and begins
     """
     #try:
-    with data.database() as db:
-        website_ids = db.query_table_ids_all('websites')#, last_date_ascending=True)
-        print(website_ids)
-        for i in website_ids:
-            website = db.query_websites(website_id=i)
-            #print(website)
-            if website.name == 'Patheos Blogs':
-                print(website.name)
-                if update:
-                    patheos.fetch_and_insert_categories(website_id=website.id)
-                    with data.database() as db:
-                        result = db.execute("SELECT name FROM categories")
-                        for i in result:
-                            results = patheos.fetch_and_insert_blogs(i[0])
-                            print(f'Inserted: {results.inserted} '
-                                + f'| Not Inserted: {results.not_inserted} '
-                                + f' | Errors: {results.exceptions}')
-                if stop:
-                    exit()
-                else:
-                    patheos.scrape_patheos(website.id)
+    websites = pw.website.select()
+    #for website in websites:
+        #print(website.id)
+    for website in websites:
+        #print(website)
+        if website.name == 'Patheos Blogs':
+            print(website.name)
+            if update:
+                patheos.fetch_and_insert_categories(website)
+                #with data.database() as db:
+                categories = pw.category.select()
+                for category in categories:
+                    #print(category.url)
+                    results = patheos.fetch_and_insert_blogs(category)
+                    #print(category.name)
+                    print(f'Inserted: {results.inserted} '
+                        + f'| Not Inserted: {results.not_inserted} '
+                        + f' | Errors: {results.exceptions}')
+            if stop:
+                exit()
             else:
-                pass
-    #except Exception:
+                patheos.scrape_patheos(website.id)
+        else:
+            pass
+#except Exception:
 
 
 @cli.command('init', help='Initializes table creation in database.')
-def initialize():
-    with data.database() as db:
-        db.create_tables()
-        click.echo('COMPLETE: table creation/update')
+@click.option('-d', '--drop', 'drop', is_flag=True, help='Drop (ERASES) all tables before creation statements')
+def initialize(drop):
+    delete_tables = True if drop else False
+    pw.database_create_tables(delete_tables)
 
 
 @cli.command('websites', help='List and manage top level websites.')
 @click.argument('name', required=False)
 @click.argument('url', required=False)
 def websites(name, url):
-    with data.database() as db:
+    try:
         if (name and url == None) or (url and name == None):
             click.echo('Both NAME and URL are needed to add a site.\n')
             exit()
         if name and url:
-            patheos.insert_website(name, url)
-        website_ids = db.query_table_ids_all('websites')
-        for i in website_ids:
-            website = db.query_websites(website_id=i)
+            website = pw.website(name=name, url=url)
+            website.save()
+        websites = pw.website.select() #.order_by(website.last_date)
+        for website in websites:
             click.echo('WEBSITE NAME:' + website.name)
             click.echo('WEBSITE URL:'+ website.url + '\n')
+    except peewee.IntegrityError as e:
+        click.echo(f'INTEGRITY ERROR: {e}')
 
 
 # @cli.command('hold')

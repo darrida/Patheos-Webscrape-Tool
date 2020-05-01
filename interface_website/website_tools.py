@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup as BS
 import requests
 
 # LOCAL
-from interface_db import db_interface_sqlite as data
+#from interface_db import db_interface_sqlite as data
+from interface_db import orm_peewee_classes as data
 
 
 
@@ -39,12 +40,20 @@ def check_url_new(table: str, url: str) -> bool:
         bool: True if url exists in given table; False if it doesn't exist.
     
     """
-    with data.database() as db:
-        existing_url = db.execute(f'SELECT url FROM {table} WHERE url = \'{url}\'')
-        if len(existing_url) == 0:
-            return True
-        else: 
-            return False        
+    #existing = data.category.select().where(url==url)
+    #existing = None
+    #peewee_query = f'existing = data.{table}.select().where(url==\'{url}\')'
+    #exec(peewee_query)
+    existing = data.db.execute_sql(f'SELECT url FROM {table} WHERE url = \'{url}\'').fetchall()
+    print(url, existing)
+    #existing_try_2 = data.db.execute_sql(f'SELECT url FROM {table} WHERE url = \'{url}\'').fetchone()
+    #print(existing_try_2)
+    if len(existing) == 0:
+        return True
+        print(True)
+    else: 
+        return False  
+              
 
 
 # this should probably be deleted, or put in some initialization file
