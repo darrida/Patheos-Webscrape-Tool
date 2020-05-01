@@ -130,11 +130,12 @@ def fetch_and_insert_categories(website: data.website) -> tools.insert_results:
         try:
             category.save()
             results.inserted += 1
-        except peewee.IntegrityError as e:
+        except peewee.IntegrityError as e:    # Related to unique constraint preventing insertion. Desired result | Skipped
             # <logging placeholder>
             results.not_inserted += 1
         except peewee.InternalError as e:
             # <logging placeholder>
+            print(f'INTERNALERROR: {e}')
             results.not_inserted += 1
         category = None
     return results
@@ -156,17 +157,18 @@ def fetch_and_insert_blogs(category: data.category) -> tools.insert_results:
             try:
                 blog.save()
                 results.inserted += 1
-            except peewee.IntegrityError as e:
+            except peewee.IntegrityError as e:    # Related to unique constraint preventing insertion. Desired result | Skipped
                 # <logging placeholder>
                 results.not_inserted += 1
             except peewee.InternalError as e:
                 # <logging placeholder>
+                print(f'INTERNALERROR: {e}')
                 results.not_inserted += 1
         return results
-    except psycopg2.errors.UniqueViolation as e:
-        print(f'UNIQUEVIOLATION: {e}')
-    except peewee.IntegrityError as e:
-        print(f'INTEGRITYERROR: {e}')
+    # except psycopg2.errors.UniqueViolation as e:
+    #     print(f'UNIQUEVIOLATION: {e}')
+    # except peewee.IntegrityError as e:
+    #     print(f'INTEGRITYERROR: {e}')
 
 
 def number_of_blog_pages(name=None, blog_id=None) -> int:
