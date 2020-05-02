@@ -6,10 +6,9 @@ from datetime import datetime
 from datetime import date
 
 # PyPI
-import psycopg2
 
 # LOCAL
-from interface_db import table_classes as table
+from interface_db.reference import table_classes as table
 
 # Variables to make pylint happy
 test_database=None
@@ -114,15 +113,6 @@ test_database=None
 #         self.create_user = create_user
 
 
-class db_connect_postgres:
-    def __init__(self, user: str, password: str, host: str, port: int, environment=None):
-        self.user        = user
-        self.password    = password
-        self.host        = host
-        self.port        = port
-        self.environment = environment
-
-
 class database(object):
     """Handles all database connectsion, inputs, and outputs
     
@@ -140,15 +130,25 @@ class database(object):
         #     print(os.path.exists(prod_database / 'webscraper.db'))
         #     __DB_LOCATION = prod_database / 'webscraper.db'
         #     print(__DB_LOCATION)
+
         else:
-            self.__db_connection = psycopg2.connect(
-                user='postgres',
-                password='postgrest',
-                host='192.168.86.108',
-                port='32834',
-                #database='postgres_db'
+            __DB_LOCATION = (
+                Path.home() 
+                / "py_apps" 
+                / "_appdata" 
+                / "webscraper"
+                / "webscraper.db"
             )
-            self.cur = self.__db_connection.cursor()
+            if os.path.exists(__DB_LOCATION):
+                self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
+                self.cur = self.__db_connection.cursor()
+            else:
+                Path(
+                    Path.home() / "py_apps" / "_appdata" / "webscraper"
+                ).mkdir(parents=True, exist_ok=True)
+                self.__db_connection = sqlite3.connect(str(__DB_LOCATION))
+                self.cur = self.__db_connection.cursor()
+
     def __del__(self):
         self.__db_connection.close()
 
@@ -187,8 +187,7 @@ class database(object):
         if name:
             result = self.cur.execute(f"""SELECT * FROM websites WHERE name = '{name}'""").fetchone()
         elif url:
-            result = self.cur.execute(f"""SELECT * FROM websites WHERE url = '{url}'""")
-            print(result)
+            result = self.cur.execute(f"""SELECT * FROM websites WHERE url = '{url}'""").fetchone()
         elif website_id:
             result = self.cur.execute(f"""SELECT * FROM websites WHERE id = '{website_id}'""").fetchone()
         else:
@@ -503,7 +502,7 @@ class database(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS 
                             site_pages (
-                                id           BIGSERIAL PRIMARY KEY, 
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 number       INTEGER NOT NULL,
                                 site_id      INTEGER NOT NULL UNIQUE,
                                 last_date    TIMESTAMP,
@@ -515,7 +514,7 @@ class database(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS 
                             url_error_list (
-                                id           BIGSERIAL PRIMARY KEY,
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 url          TEXT NOT NULL,
                                 url_type     TEXT NOT NULL,
                                 parent_id    INTEGER NOT NULL,
@@ -529,7 +528,7 @@ class database(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS 
                             websites (
-                                id           BIGSERIAL PRIMARY KEY, 
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 name         VARCHAR(100) NOT NULL, 
                                 url          VARCHAR(2000) NOT NULL,
                                 last_date    TIMESTAMP,
@@ -541,7 +540,7 @@ class database(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS 
                             categories (
-                                id           BIGSERIAL PRIMARY KEY,
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 name         VARCHAR(100) NOT NULL, 
                                 context      VARCHAR(100), 
                                 url          VARCHAR(2000) NOT NULL,
@@ -555,7 +554,7 @@ class database(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS
                             blogs (
-                                id           BIGSERIAL PRIMARY KEY,
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 auther       VARCHAR(255),
                                 name         VARCHAR(255), 
                                 url          TEXT NOT NULL,
@@ -569,7 +568,7 @@ class database(object):
         self.cur.execute(
             """CREATE TABLE IF NOT EXISTS
                             posts (
-                                id           BIGSERIAL PRIMARY KEY,
+                                id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
                                 title        VARCHAR(255) NOT NULL,
                                 author       VARCHAR(255),
                                 date         TIMESTAMP, 
