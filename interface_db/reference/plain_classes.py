@@ -2,7 +2,7 @@
 
 class website:
     """Intended use is with an insert function into the website table."""
-    def __init__(self, id, name, url, last_date, last_user, create_date, create_user)
+    def __init__(self, id, name, url, last_date, last_user, create_date, create_user):
         self.id          = id
         self.name        = name
         self.url         = url
@@ -40,9 +40,8 @@ class blog:
 
 
 class post:
-        """Intended use is with an insert function into the patheos_posts table."""
-    def __init__(self, id, title, author, date, tags, content, url, blog_id, last_date, last_user, c
-                 reate_date, create_user):
+    """Intended use is with an insert function into the patheos_posts table."""
+    def __init__(self, id, title, author, date, tags, content, url, blog_id, last_date, last_user, create_date, create_user):
         self.id          = id
         self.title       = title
         self.author      = author
