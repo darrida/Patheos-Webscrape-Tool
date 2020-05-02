@@ -42,17 +42,18 @@ def check_url_new(table: str, url: str) -> bool:
     """
     #existing = data.category.select().where(url==url)
     #existing = None
-    #peewee_query = f'existing = data.{table}.select().where(url==\'{url}\')'
-    #exec(peewee_query)
-    existing = data.db.execute_sql(f'SELECT url FROM {table} WHERE url = \'{url}\'').fetchall()
-    print(url, existing)
+    peewee_query = f'existing = data.{table}.select().where(data.{table}.url==\'{url}\')'
+    result = exec(peewee_query)
+    print(result)
+    #existing = data.db.execute_sql(f'SELECT url FROM {table} WHERE url = \'{url}\'').fetchall()
+    #print(url, existing)
     #existing_try_2 = data.db.execute_sql(f'SELECT url FROM {table} WHERE url = \'{url}\'').fetchone()
     #print(existing_try_2)
-    if len(existing) == 0:
-        return True
-        print(True)
-    else: 
-        return False  
+    # if len(existing) == 0:
+    #     return True
+    #     print(True)
+    # else: 
+    #     return False  
               
 
 

@@ -49,7 +49,7 @@ def pyscrape_start(update, stop):
             if stop:
                 exit()
             else:
-                patheos.scrape_patheos(website.id)
+                patheos.scrape_patheos(website)
         else:
             pass
 #except Exception:

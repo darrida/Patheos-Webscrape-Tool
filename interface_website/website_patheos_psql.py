@@ -22,14 +22,12 @@ results = tools.insert_results()
 
 
 def scrape_patheos(website: data.website):    
-    #data.db.connect()
-    categories = data.category.select().join(website).where(website_id=website.id)
-    print(categories)
+    categories = data.category.select().where(data.category.website_id==website.id)
     for category in categories:
         print(category.name)
-        blogs = data.blog.select().join(category).where(category_id=category.id)
+        blogs = data.blog.select().where(data.blog.category_id==category.id)
         for blog in blogs:
-            scrape_blog_initialize(blog.id)
+            scrape_blog_initialize(blog)
         query = (category
                  .update(last_date=datetime.datetime.utcnow(),
                          last_user='user')
@@ -38,35 +36,31 @@ def scrape_patheos(website: data.website):
 
 
 def scrape_blog_initialize(blog: data.blog):
-    #blog = db.blog.select().join(blog).where(blog_id=blog.id)
-    #data.db.connect()
-    total_blogs = blog.select().count()
-    total_pages = (data.blog_count_pages
-                       .select()
-                       .join(blog)
-                       .where(blog_id=blog.id)) #number_of_blog_pages(blog_id=blog.id)
+    total_blogs = len(data.blog.select().where(data.blog.category_id==blog.category_id))
+    total_pages = number_of_blog_pages(blog)
     resume_page = find_page_resume_scrape(blog.id)
-    
     page_number = resume_page
+
     total = 0
     continue_on = True
     while continue_on == True:
         base_url = blog.url + '/page/' + str(page_number)
-        #print(base_url)
         results_l = scrape_posts_on_page(base_url)
         if results_l != 404:
             for i in results_l:
                 try:
-                    post = data.post(url=i, blog_id=blog.id) #table.post(i, blog.id)
-#                     post = scrape_post(post, 'no')
-                    if tools.check_url_new('posts', i) == True:
+                    post = data.post(url=i, blog_id=blog.id)
+                    try:
                         post = scrape_post(post, 'no')
                         if post.title == None:
                             print('no title')
                         post.save()
                         results.inserted += 1
-                    else:
-                        # <placeholder for logging>
+                    except peewee.IntegrityError as e:
+                        # <logging placeholder>
+                        results.not_inserted += 1
+                    except peewee.InternalError as e:
+                        print(f'INTERNALERROR: {e}')
                         results.not_inserted += 1
                     total += 1
                     sys.stdout.write('\r' + 'BLOG: (' + str(blog.id) + '/' + str(total_blogs) + ') '  + blog.name 
@@ -142,45 +136,53 @@ def fetch_and_insert_categories(website: data.website) -> tools.insert_results:
 
 
 def fetch_and_insert_blogs(category: data.category) -> tools.insert_results:
-    try:
-        results = tools.insert_results()
-        parsed_html = tools.parse_html(category.url)
-        for item in parsed_html.find_all('div', attrs={"class":"author-info"}):
-            blog=data.blog()
-            for title_html in item.find_all('div', attrs={"class":"title"}):
-                title_html_a = title_html.find('a')
-                blog.name = title_html_a.get_text()
-                blog.url = title_html_a['href']
-            for by_line_html in item.find_all('div', attrs={"class":"by-line"}):
-                blog.author = by_line_html.find('a').get_text()
-            blog.category_id = category.id
-            try:
-                blog.save()
-                results.inserted += 1
-            except peewee.IntegrityError as e:    # Related to unique constraint preventing insertion. Desired result | Skipped
-                # <logging placeholder>
-                results.not_inserted += 1
-            except peewee.InternalError as e:
-                # <logging placeholder>
-                print(f'INTERNALERROR: {e}')
-                results.not_inserted += 1
-        return results
+    #try:
+    results = tools.insert_results()
+    parsed_html = tools.parse_html(category.url)
+    for item in parsed_html.find_all('div', attrs={"class":"author-info"}):
+        blog=data.blog()
+        for title_html in item.find_all('div', attrs={"class":"title"}):
+            title_html_a = title_html.find('a')
+            blog.name = title_html_a.get_text()
+            blog.url = title_html_a['href']
+        for by_line_html in item.find_all('div', attrs={"class":"by-line"}):
+            blog.author = by_line_html.find('a').get_text()
+        blog.category_id = category.id
+        try:
+            blog.save()
+            results.inserted += 1
+        except peewee.IntegrityError as e:    # Related to unique constraint preventing insertion. Desired result | Skipped
+            # <logging placeholder>
+            results.not_inserted += 1
+        except peewee.InternalError as e:
+            # <logging placeholder>
+            print(f'INTERNALERROR: {e}')
+            results.not_inserted += 1
+    return results
     # except psycopg2.errors.UniqueViolation as e:
     #     print(f'UNIQUEVIOLATION: {e}')
     # except peewee.IntegrityError as e:
     #     print(f'INTEGRITYERROR: {e}')
 
 
-def number_of_blog_pages(name=None, blog_id=None) -> int:
-    blog = data.blog.select().where(id==blog_id)
+def number_of_blog_pages(blog) -> int:
     base_page_url = blog.url + '/page/'
-    page = data.blog_count_pages.select().where(blog_id==blog.id)
-    if page.number > 1:
-        valid_page = page.number
-    else:
-        valid_page = 1
-    valid_page = page.number if page.number > 1 else 1
-    original_number = valid_page
+    try:
+        results = (data.blog_count_pages.select().where(data.blog_count_pages.blog_id==blog.id).namedtuples())
+        for result in results:
+            valid_page = result.number
+        print(f'Previous page count: {valid_page}')
+        #page = data.blog_count_pages(number=valid_page, blog_id=blog.id)
+    except Exception as e:
+        if str(e).startswith('<Model: blog_count_pages> instance matching query does not exist') or \
+           str(e).startswith("local variable 'valid_page' referenced before assignment"):
+            valid_page = 1
+            print(f'First page number count, starting with {valid_page}')
+            page = data.blog_count_pages(number=valid_page, blog_id=blog.id)
+        else:
+            print(f'EXCPETION: {e}')
+            exit()
+    #original_number = valid_page
     p = valid_page
     search_increment_list = [1000, 100, 10, 5, 1, 0]
     search_list_index = 0
@@ -197,14 +199,16 @@ def number_of_blog_pages(name=None, blog_id=None) -> int:
                 p = (p - search_increment) + search_increment_list[search_list_index]
         except IndexError:
             search_increment = 0
-        query = (page
-                .update
-                .where())
-        query.execute()
-        page = data.blog_count_pages(valid_page, blog.id)
-        page.save()
-        #sys.stdout.write('\r' 'PAGES: ' + str(valid_page))
-    return valid_page #- original_number
+        if 'page' in locals():
+            page.number = valid_page # = data.blog_count_pages(valid_page, 149)
+            page.save()
+        else:
+            nrows = (data.blog_count_pages
+                    .update(number=valid_page)
+                    .where(data.blog_count_pages.blog_id == blog.id)
+                    .execute())
+        sys.stdout.write('\r' 'PAGES: ' + str(valid_page))
+    return valid_page
 
 
 def scrape_posts_on_page(blog_page_url: str) -> list:
@@ -224,7 +228,6 @@ def scrape_posts_on_page(blog_page_url: str) -> list:
 # def scrape_post(url: str, blog_id: str, unicode_escape_yes_no='no') -> object:  # post class
 def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post class
     tags = []
-    #post = table.post(url=url, blog_id=blog_id)
     response = requests.get(post.url)
     if response.status_code != 404:
         parsed_html = BS(response.content, 'html.parser')
@@ -233,7 +236,7 @@ def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post cla
             post.author = g_basic.find("span", {"itemprop": "author"}).text
             post.date = g_basic.find("span", {"itemprop": "datePublished dateModified"}).text
         post.content = parsed_html.find("div", {"class": "story-block"}).text
-        post.content_html = None
+        post.content_html = ''
         for items in parsed_html.find_all("ul", {"class": "list-inline related-topics"}):
             for g_tags in items.find_all("li")[0:]:
                 if g_tags.find('a'):
@@ -247,6 +250,7 @@ def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post cla
 
 
 def find_page_resume_scrape(blog_id):
-    number_of_posts = data.post.count().where(id=blog_id)
+    posts_in_blog = data.post.select().where(data.post.blog_id==blog_id)
+    number_of_posts = len(posts_in_blog)
     number_of_pages = math.floor(number_of_posts / 10)
     return number_of_pages
