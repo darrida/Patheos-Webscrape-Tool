@@ -24,7 +24,8 @@ def cli():
 @cli.command('start', help='Begins or resumes scraping of configured websites.')
 @click.option('-u', '--update', 'update', is_flag=True)
 @click.option('-s', '--stop', 'stop', is_flag=True, help='Process stops after category and blog update.')
-def pyscrape_start(update, stop):
+@click.option('-p', '--print_progress', 'print_progress', is_flag=True, help='Print numbers that show basic progress.')
+def pyscrape_start(update, stop, print_progress):
     """Main function that initializes the webscrapers and begins
     """
     #try:
@@ -49,7 +50,7 @@ def pyscrape_start(update, stop):
             if stop:
                 exit()
             else:
-                patheos.scrape_patheos(website)
+                patheos.scrape_patheos(website, print_progress)
         else:
             pass
 #except Exception:

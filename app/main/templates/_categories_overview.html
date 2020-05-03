@@ -1,0 +1,24 @@
+<ul class="posts">
+    <table class="table">
+        <thead>
+            <tr>
+              <th scope="col">Action</th>
+              <th scope="col">Date</th>
+              <th scope="col">Title</th>
+              <th scope="col">Author</th>
+              <th scope="col">Published</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ moment(category.last_date).fromNow() }}</td>
+				<td>{{ moment(category.create_date).fromNow() }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.website_id }}</td>
+				<td>{{ category.id }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</ul>

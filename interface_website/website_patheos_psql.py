@@ -12,7 +12,6 @@ import peewee
 
 # LOCAL
 #from interface_db import db_interface_postgres as data
-from interface_db import table_classes as table
 from interface_website import website_tools as tools
 from interface_db import orm_peewee_classes as data
 
@@ -21,22 +20,27 @@ from interface_db import orm_peewee_classes as data
 results = tools.insert_results()
 
 
-def scrape_patheos(website: data.website):    
-    categories = data.category.select().where(data.category.website_id==website.id)
+def scrape_patheos(website: data.website, print_progress: bool):    
+    categories = data.category.select().where(data.category.website_id==website.id).order_by(data.category.last_date)
     for category in categories:
         print(category.name)
-        blogs = data.blog.select().where(data.blog.category_id==category.id)
+        blogs = data.blog.select().where(data.blog.category_id==category.id).order_by(data.blog.last_date)
+        blog_out_of_category = 1
         for blog in blogs:
-            scrape_blog_initialize(blog)
-        query = (category
+            scrape_blog_initialize(blog, blog_out_of_category, print_progress)
+            blog_out_of_category +=1
+        nrows = (data.category
                  .update(last_date=datetime.datetime.utcnow(),
                          last_user='user')
-                 .where(id=category.id))
-        query.execute()
+                 .where(data.category.id==category.id).execute())
+        if nrows < 1:
+            print(f'\n{blog.name}, {blog.id}, date not updated.')
+        #query.execute()
 
 
-def scrape_blog_initialize(blog: data.blog):
+def scrape_blog_initialize(blog: data.blog, blog_out_of_category: int, print_progress: bool):
     total_blogs = len(data.blog.select().where(data.blog.category_id==blog.category_id))
+
     total_pages = number_of_blog_pages(blog)
     resume_page = find_page_resume_scrape(blog.id)
     page_number = resume_page
@@ -61,37 +65,51 @@ def scrape_blog_initialize(blog: data.blog):
                         results.not_inserted += 1
                     except peewee.InternalError as e:
                         print(f'INTERNALERROR: {e}')
-                        results.not_inserted += 1
+                        results.exceptions += 1
                     total += 1
-                    sys.stdout.write('\r' + 'BLOG: (' + str(blog.id) + '/' + str(total_blogs) + ') '  + blog.name 
+                    if print_progress:
+                        sys.stdout.write('\r' + 'BLOG: (' + str(blog_out_of_category) + '/' + str(total_blogs) + ') '  + blog.name 
                                           + ' | PAGE: ' + str(page_number) + '/' + str(total_pages) 
                                           + ' | TOTAL PROCESSED: ' + str(total) 
                                           + ' | INSERTED: ' + str(results.inserted)
-                                          + ' | NOT INSERTED: ' + str(results.not_inserted))
-                except AttributeError:
-                    url_error = data.url_error_list(i, 'post', blog.id)
-                    url_error.save()
+                                          + ' | NOT INSERTED: ' + str(results.not_inserted)
+                                          + ' | ERROR: ' + str(results.exceptions))
+                except peewee.IntegrityError as e:
+                    print(f'\nINTEGRITYERROR: {e}\n{i}')
+                    url_error = data.url_error_list(url=i, url_type='post', parent_id=blog.id, exception=f'peewee.IntegrityError: {e}')
+                    nrow = url_error.save()
+                    results.exceptions += 1
+                    if nrow > 0:
+                        print('Status: Logged')
+                except AttributeError as e:
+                    print(f'\nATTRIBUTEERROR: {e}\n{i}')
+                    url_error = data.url_error_list(url=i, url_type='post', parent_id=blog.id, exception=f'AttributeError: {e}')
+                    nrow = url_error.save()
+                    results.exceptions += 1
+                    if nrow > 0:
+                        print('Status: Logged')
         else:
             continue_on = False
         page_number += 1
-        sys.stdout.write('\r' + 'BLOG: (' + str(blog.id) + '/' + str(total_blogs) + ') '  + blog.name 
+        if print_progress:
+            sys.stdout.write('\r' + 'BLOG: (' + str(blog_out_of_category) + '/' + str(total_blogs) + ') '  + blog.name 
                               + ' | PAGE: ' + str(page_number) + '/' + str(total_pages) 
                               + ' | TOTAL PROCESSED: ' + str(total) 
                               + ' | INSERTED: ' + str(results.inserted)
-                              + ' | NOT INSERTED: ' + str(results.not_inserted))
-    nrows = (blog
+                              + ' | NOT INSERTED: ' + str(results.not_inserted)
+                              + ' | ERROR: ' + str(results.exceptions))
+    nrows = (data.blog
             .update(last_date=datetime.datetime.utcnow(),
                     last_user='user')
-            .where(id=blog.id))
+            .where(data.blog.id==blog.id).execute())
+    if nrows < 1:
+        print(f'\n{blog.name}, {blog.id}, last_date not updated')
 
 
-def insert_website(website_name: str, website_url: str) -> table.website:
+def insert_website(website_name: str, website_url: str) -> data.website:
     website = data.website(name = website_name, url = website_url)
-    #results = tools.insert_results()
-    #with data.database() as db:
     print(f'Inserting {website_name} - {website_url}')
     result = website.save()
-        #result = db.insert_website(website)
     if type(result) == str:
         print(result)
     else:
@@ -130,7 +148,7 @@ def fetch_and_insert_categories(website: data.website) -> tools.insert_results:
         except peewee.InternalError as e:
             # <logging placeholder>
             print(f'INTERNALERROR: {e}')
-            results.not_inserted += 1
+            results.exceptions += 1
         category = None
     return results
 
@@ -157,7 +175,7 @@ def fetch_and_insert_blogs(category: data.category) -> tools.insert_results:
         except peewee.InternalError as e:
             # <logging placeholder>
             print(f'INTERNALERROR: {e}')
-            results.not_inserted += 1
+            results.exceptions += 1
     return results
     # except psycopg2.errors.UniqueViolation as e:
     #     print(f'UNIQUEVIOLATION: {e}')
@@ -173,11 +191,11 @@ def number_of_blog_pages(blog) -> int:
             valid_page = result.number
         print(f'Previous page count: {valid_page}')
         #page = data.blog_count_pages(number=valid_page, blog_id=blog.id)
-    except Exception as e:
+    except Exception as e:   # no record for this blog exists yet
         if str(e).startswith('<Model: blog_count_pages> instance matching query does not exist') or \
            str(e).startswith("local variable 'valid_page' referenced before assignment"):
             valid_page = 1
-            print(f'First page number count, starting with {valid_page}')
+            print(f'\nFirst page number count, starting with {valid_page}')
             page = data.blog_count_pages(number=valid_page, blog_id=blog.id)
         else:
             print(f'EXCPETION: {e}')
@@ -207,6 +225,8 @@ def number_of_blog_pages(blog) -> int:
                     .update(number=valid_page)
                     .where(data.blog_count_pages.blog_id == blog.id)
                     .execute())
+            if nrows < 1:
+                print(f'Page count failed to update: blog id {blog.id}')
         sys.stdout.write('\r' 'PAGES: ' + str(valid_page))
     return valid_page
 
@@ -229,11 +249,16 @@ def scrape_posts_on_page(blog_page_url: str) -> list:
 def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post class
     tags = []
     response = requests.get(post.url)
+    #try:
     if response.status_code != 404:
         parsed_html = BS(response.content, 'html.parser')
         post.title = parsed_html.find("h1", {"class" : "entry-title"}).text
         for g_basic in parsed_html.find_all("div", {"class": "main-post"}):
+            # try:
             post.author = g_basic.find("span", {"itemprop": "author"}).text
+            # except AttributeError as e:
+            #     if str(e) == "'NoneType' object has no attribute 'text'":
+            #         post.author = 'MISSING'
             post.date = g_basic.find("span", {"itemprop": "datePublished dateModified"}).text
         post.content = parsed_html.find("div", {"class": "story-block"}).text
         post.content_html = ''
@@ -247,6 +272,13 @@ def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post cla
             post.title = post.title.encode('unicode_escape')
             post.content = post.content.encode('utf8')
     return post
+    # except AttributeError as e:
+    #     print(f'\nATTRIBUTEERROR: {e}\n{post.url}')
+    #     url_error = data.url_error_list(url=post.url, url_type='post', parent_id=post.blog_id, exception=f'AttributeError: {e}')
+    #     nrow = url_error.save()
+    #     if nrow > 0:
+    #         print('Status: Logged')
+    #     return None
 
 
 def find_page_resume_scrape(blog_id):

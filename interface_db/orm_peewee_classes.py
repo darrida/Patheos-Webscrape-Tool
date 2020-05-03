@@ -99,6 +99,7 @@ class url_error_list(PostgresqlModel):
     url         = pw.TextField()
     url_type    = pw.TextField()
     parent_id   = pw.IntegerField()
+    exception   = pw.TextField()
     resolved    = pw.BooleanField(default=False)
     last_date   = pw.DateTimeField(default=datetime.datetime.utcnow())
     last_user   = pw.TextField(default='user')
