@@ -5,6 +5,7 @@ from interface_db import orm_peewee_classes as data
 
 # initilize flask
 app = Flask(__name__)
+app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
 
 # setup the route
