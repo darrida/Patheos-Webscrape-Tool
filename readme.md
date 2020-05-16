@@ -1,5 +1,13 @@
 # Patheos Webscrape Tool
 
+## Deploy to Heroku
+
+```powershell
+heroku create webscrape-tool
+heroku git:remote -a webscrape-tool
+tools\heroku-config.ps1
+```
+
 ## Rebuild (for notes related to this, see "Learning Notes" below)
 
 - **NOTE:** Code prior to rebuild process can be found at commit 9b45b0dda3cef2a2d17f25617ef190f38093c94e

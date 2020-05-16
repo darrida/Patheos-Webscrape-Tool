@@ -18,26 +18,26 @@ class config_postgres:
      
 
 def connect():
-    if 'HEROKU' in os.environ:
-        parse.uses_netloc.append('postgres')
-        url = parse.urlparse(os.environ['DATABASE_URL'])
-        return pw.PostgresqlDatabase(
-            database=url.path[1:],
-            user=url.username,
-            password=url.password,
-            host=url.hostname,
-            port=url.port,
-            autorollback=True
-        )
-    else:
-        return pw.PostgresqlDatabase(
-            database='postgres',
-            user='postgres',
-            password='postgrest',
-            host='192.168.86.108',
-            port='32834',
-            autorollback=True
-        )
+    # if 'HEROKU' in os.environ:
+    parse.uses_netloc.append('postgres')
+    url = parse.urlparse(os.environ['DATABASE_URL'])
+    return pw.PostgresqlDatabase(
+        database=url.path[1:],
+        user=url.username,
+        password=url.password,
+        host=url.hostname,
+        port=url.port,
+        autorollback=True
+    )
+    # else:
+    #     return pw.PostgresqlDatabase(
+    #         database='postgres',
+    #         user='postgres',
+    #         password='postgrest',
+    #         host='192.168.86.108',
+    #         port='32834',
+    #         autorollback=True
+    #     )
 
 psql_db = connect()
 
