@@ -68,7 +68,7 @@ def initialize(drop):
 @click.argument('url', required=False)
 def websites(name, url):
     try:
-        if (name and url == None) or (url and name == None):
+        if name and url is None or url and name is None:
             click.echo('Both NAME and URL are needed to add a site.\n')
             exit()
         if name and url:

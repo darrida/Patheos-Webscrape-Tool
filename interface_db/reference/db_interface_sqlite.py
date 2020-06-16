@@ -231,8 +231,6 @@ class database(object):
             result = self.cur.execute(f"""SELECT * FROM blogs WHERE id = '{blog_id}'""").fetchone()
         elif name:
             result = self.cur.execute(f"""SELECT * FROM blogs WHERE name = '{name}'""").fetchone()
-        elif name:
-            result = self.cur.execute(f"""SELECT * FROM blogs WHERE url = '{url}'""").fetchone()
         if result:
             return table.blog(id          = result[0], # id
                         author      = result[1], # name
@@ -320,7 +318,7 @@ class database(object):
 
         """
         existing_url = self.query_websites(url=website.url)
-        new = True if existing_url == None else False
+        new = True if existing_url is None else False
         if new == True:
             next_id = self.cur.execute("""SELECT MAX(id) FROM websites""").fetchone()[0]
             if next_id:
@@ -489,11 +487,13 @@ class database(object):
         Can be used by calling the function directly, but is designed to by used by install.py, which is called by the install.bat file.
         
         """
-        if (
-            Path.home() / "py_apps" / "_appdata" / "webscrape_patheos" / "patheos.db"
+        if not (
+            Path.home()
+            / "py_apps"
+            / "_appdata"
+            / "webscrape_patheos"
+            / "patheos.db"
         ):
-            pass
-        else:
             Path(Path.home() / "py_apps" / "_appdata" / "webscrape_patheos" / "patheos.db").mkdir(
                 parents=True, exist_ok=True
             )
@@ -597,10 +597,7 @@ class database(object):
         
         """
         existing_url = self.cur.execute(f'SELECT url FROM {table} WHERE url = \'{url}\'')
-        if len(existing_url) == 0:
-            return True
-        else: 
-            return False
+        return len(existing_url) == 0
 
     def commit(self):
         """Use after any other database class function to commit changes.
