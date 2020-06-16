@@ -1,0 +1,24 @@
+<ul class="posts">
+    <table class="table">
+        <thead>
+            <tr>
+              <th scope="col">Action</th>
+              <th scope="col">Date</th>
+              <th scope="col">Title</th>
+              <th scope="col">Author</th>
+              <th scope="col">Published</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for blog in blogs %}
+            <tr>
+                <td>{{ moment(blog.last_date).fromNow() }}</td>
+				<td>{{ moment(blog.create_date).fromNow() }}</td>
+                <td>{{ blog.name }}</td>
+                <td>{{ blog.website_id }}</td>
+				<td>{{ blog.id }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</ul>
