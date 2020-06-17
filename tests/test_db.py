@@ -14,15 +14,12 @@ from ..interface_db import db_interface_sqlite as data
 
 def test_create_test_db():
     __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
-    if os.path.exists(__DB_LOCATION):
-        connection = sqlite3.connect(str(__DB_LOCATION))
-        cur = connection.cursor()
-    else:
+    if not os.path.exists(__DB_LOCATION):
         Path(
             Path.cwd() / 'tests' / 'test_files'
         ).mkdir(parents=True, exist_ok=True)
-        connection = sqlite3.connect(str(__DB_LOCATION))
-        cur = connection.cursor()
+    connection = sqlite3.connect(str(__DB_LOCATION))
+    cur = connection.cursor()
     assert cur
 
 
@@ -42,7 +39,7 @@ def test_create_tables():
 
 
 def test_insert_website_and_pk(connection=None):
-    if connection == None:
+    if connection is None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
     with data.database(connection) as db:
@@ -57,7 +54,7 @@ def test_insert_website_and_pk(connection=None):
 
 
 def test_insert_category_and_pk(connection=None):
-    if connection == None:
+    if connection is None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
     with data.database(connection) as db:
@@ -78,7 +75,7 @@ def test_insert_category_and_pk(connection=None):
 
 
 def test_insert_blog_and_pk(connection=None):
-    if connection == None:
+    if connection is None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
     with data.database(connection) as db:
@@ -99,7 +96,7 @@ def test_insert_blog_and_pk(connection=None):
 
 
 def test_insert_post_and_pk(connection=None):
-    if connection == None:
+    if connection is None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
     with data.database(connection) as db:
@@ -126,15 +123,15 @@ def test_insert_post_and_pk(connection=None):
 
 
 def test_query_posts_count(connection=None):
-        if connection == None:
-            __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
-        connection = sqlite3.connect(str(__DB_LOCATION))
-        with data.database(connection) as db:
-            result = db.execute('SELECT count(id) FROM posts')
-        assert result[0][0] == 2
+    if connection is None:
+        __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
+    connection = sqlite3.connect(str(__DB_LOCATION))
+    with data.database(connection) as db:
+        result = db.execute('SELECT count(id) FROM posts')
+    assert result[0][0] == 2
 
 def test_query_websites(connection=None):
-    if connection == None:
+    if connection is None:
         __DB_LOCATION = Path.cwd() / 'tests' / 'test_files' / 'test.db'
         connection = sqlite3.connect(str(__DB_LOCATION))
     with data.database(connection) as db:

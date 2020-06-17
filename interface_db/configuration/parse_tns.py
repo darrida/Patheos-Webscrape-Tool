@@ -23,9 +23,8 @@ def parse_tnsnames(tnsnames_path, server):
         with open(tns_read, 'r') as f:
             for line in f:
                 if line.startswith(server + " =") or line.startswith(server + "="):
-                    counter = 0
                     search_line = line
-                    while counter < 7:
+                    for _ in range(7):
                 #SEARCH FOR HOSTNAME
                         #print(str(counter) + ":" + search_line)
                         if re.match(".*HOST = ", search_line):
@@ -50,10 +49,9 @@ def parse_tnsnames(tnsnames_path, server):
                             service_name = service_name.split(')')[0]
 
                         search_line = next(f)
-                        counter += 1
                     connection = "@" + host + ":" + port + "/" + service_name
-                    #return connection
-                    
+                                    #return connection
+
                 else:
                     lines_tested += 1
             try:
@@ -64,7 +62,7 @@ def parse_tnsnames(tnsnames_path, server):
             except NoServerError:
                 print("EXCEPTION: " + str(lines_tested) + " lines were read, but specified SID "
                           + "not found in tnsnames.ora. Please check server name and tnsnames.ora path.")
-                
+
     except FileNotFoundError:
         print("ERROR: Unable to find or open tnsnames.ora. Double check submitted path.")
     return connection

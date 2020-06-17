@@ -48,8 +48,6 @@ def pyscrape_start(update, stop):
                     exit()
                 else:
                     patheos.scrape_patheos(website.id)
-            else:
-                pass
     #except Exception:
 
 
@@ -65,7 +63,7 @@ def initialize():
 @click.argument('url', required=False)
 def websites(name, url):
     with data.database() as db:
-        if (name and url == None) or (url and name == None):
+        if name and url is None or url and name is None:
             click.echo('Both NAME and URL are needed to add a site.\n')
             exit()
         if name and url:

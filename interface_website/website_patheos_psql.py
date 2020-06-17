@@ -47,7 +47,7 @@ def scrape_blog_initialize(blog: data.blog, blog_out_of_category: int, print_pro
 
     total = 0
     continue_on = True
-    while continue_on == True:
+    while continue_on:
         base_url = blog.url + '/page/' + str(page_number)
         results_l = scrape_posts_on_page(base_url)
         if results_l != 404:
@@ -56,7 +56,7 @@ def scrape_blog_initialize(blog: data.blog, blog_out_of_category: int, print_pro
                     post = data.post(url=i, blog_id=blog.id)
                     try:
                         post = scrape_post(post, 'no')
-                        if post.title == None:
+                        if post.title is None:
                             print('no title')
                         post.save()
                         results.inserted += 1
@@ -284,5 +284,4 @@ def scrape_post(post: object, unicode_escape_yes_no='no') -> object:  # post cla
 def find_page_resume_scrape(blog_id):
     posts_in_blog = data.post.select().where(data.post.blog_id==blog_id)
     number_of_posts = len(posts_in_blog)
-    number_of_pages = math.floor(number_of_posts / 10)
-    return number_of_pages
+    return math.floor(number_of_posts / 10)
